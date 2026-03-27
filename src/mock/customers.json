@@ -21,8 +21,8 @@
         "participantIds": ["u6"],
         "participants": [],
         "startTime": "11:00",
-        "endTime": "11:45",
-        "status": "เสร็จสิ้น",
+        "endTime": null,
+        "status": "กำลังทำ",
         "createdAt": "2026-03-27T11:00:00.000Z"
       },
       {
