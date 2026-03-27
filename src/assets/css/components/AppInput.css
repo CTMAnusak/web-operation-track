@@ -1,0 +1,74 @@
+.app-input {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.app-input__wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1.5px solid #dde1e8;
+  border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.app-input__wrapper--focused {
+  border-color: #a0c4fa;
+  box-shadow: 0 0 0 3px rgba(52, 120, 246, 0.06);
+}
+
+.app-input__wrapper--error {
+  border-color: #e53935;
+  box-shadow: none;
+}
+
+.app-input__field {
+  flex: 1;
+  padding: 14px 16px;
+  border: none;
+  border-width: 0;
+  background-color: transparent;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 15px;
+  color: #1a1a1a;
+  outline: none;
+  min-width: 0;
+}
+
+.app-input__field:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.app-input__field::placeholder {
+  color: #b0b4bc;
+  font-weight: 400;
+  opacity: 1;
+}
+
+.app-input__toggle {
+  padding: 0 14px 0 0;
+  background-color: transparent;
+  border: none;
+  border-width: 0;
+  cursor: pointer;
+  color: #b0b4bc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.app-input__toggle:hover {
+  color: #666666;
+}
+
+.app-input__error {
+  margin-top: 6px;
+  padding-left: 4px;
+  font-size: 13px;
+  color: #e53935;
+  font-family: 'Nunito Sans', sans-serif;
+}

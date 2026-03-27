@@ -1,0 +1,289 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "username": "OPDX32434",
+      "password": "123456",
+      "fullName": "ฉลธีรา จันทรพงศ์",
+      "nickname": "ฉลธี",
+      "branchId": "b6",
+      "roleId": "r3"
+    },
+    {
+      "id": "u2",
+      "username": "OPDX32435",
+      "password": "123456",
+      "fullName": "นภญา สุขฤทธิ์",
+      "nickname": "นภ",
+      "branchId": "b2",
+      "roleId": "r2"
+    },
+    {
+      "id": "u3",
+      "username": "OPDX32436",
+      "password": "123456",
+      "fullName": "นพ.สาธิต พณิชย์พิบูลย์",
+      "nickname": "บาส",
+      "branchId": "b2",
+      "roleId": "r1"
+    },
+    {
+      "id": "u4",
+      "username": "OPDX32437",
+      "password": "123456",
+      "fullName": "พญ.วรรษชล รัตนแสนสุข",
+      "nickname": "แอน",
+      "branchId": "b2",
+      "roleId": "r1"
+    },
+    {
+      "id": "u5",
+      "username": "OPDX32438",
+      "password": "123456",
+      "fullName": "พญ.วรรณศิลป์ สุขสมานพันธ์",
+      "nickname": "เพลิน",
+      "branchId": "b2",
+      "roleId": "r1"
+    },
+    {
+      "id": "u6",
+      "username": "OPDX32439",
+      "password": "123456",
+      "fullName": "นพ.อิทธิพัทธ์ ผลวาวแวว",
+      "nickname": "กอล์ฟ",
+      "branchId": "b2",
+      "roleId": "r1"
+    },
+    {
+      "id": "u7",
+      "username": "OPDX32440",
+      "password": "123456",
+      "fullName": "พญ.วันรวี ปิติเกื้อกูล",
+      "nickname": "แพน",
+      "branchId": "b2",
+      "roleId": "r1"
+    },
+    {
+      "id": "u8",
+      "username": "OPDX3241",
+      "password": "123456",
+      "fullName": "พญ.ธนิสา สุภัทรกุล",
+      "nickname": "แพร",
+      "branchId": "b2",
+      "roleId": "r1"
+    },
+    {
+      "id": "u9",
+      "username": "OPDX32442",
+      "password": "123456",
+      "fullName": "นพ.พีรพล สุทธิภาศิลป์",
+      "nickname": "เบิร์ด",
+      "branchId": "b6",
+      "roleId": "r1"
+    },
+    {
+      "id": "u10",
+      "username": "OPDX32434",
+      "password": "123456",
+      "fullName": "อุรัสยา เสปอร์บันด์",
+      "nickname": "ญาญ่า",
+      "branchId": "b2",
+      "roleId": "r3"
+    },
+    {
+      "id": "u11",
+      "username": "OPDX32435",
+      "password": "123456",
+      "fullName": "คิมเบอร์ลี่ โวลเทมัส",
+      "nickname": "คิมเบอร์ลี่",
+      "branchId": "b6",
+      "roleId": "r2"
+    },
+    {
+      "id": "u12",
+      "username": "OPDX32434",
+      "password": "123456",
+      "fullName": "ณเดชน์ คูกิมิยะ",
+      "nickname": "แบรี่",
+      "branchId": "b2",
+      "roleId": "r3"
+    },
+    {
+      "id": "u13",
+      "username": "OPDX32435",
+      "password": "123456",
+      "fullName": "ปริญ สุภารัตน์",
+      "nickname": "หมาก",
+      "branchId": "b6",
+      "roleId": "r2"
+    },
+    {
+      "id": "u14",
+      "username": "OPDX32434",
+      "password": "123456",
+      "fullName": "ซีเค เจิง",
+      "nickname": "ซีเค",
+      "branchId": "b2",
+      "roleId": "r3"
+    }
+  ],
+  "procedureCategories": [
+    { "id": "cat1", "name": "หัตถการเครื่อง", "iconKey": "machine" },
+    { "id": "cat2", "name": "หัตถการฉีด", "iconKey": "inject" },
+    { "id": "cat3", "name": "หัตถการ Wellness", "iconKey": "wellness" },
+    { "id": "cat4", "name": "หัตถการ Laser", "iconKey": "laser" }
+  ],
+  "machineTypes": [
+    { "id": "m1", "name": "Ulthera", "categoryId": "cat1" },
+    { "id": "m2", "name": "Ultraformer", "categoryId": "cat1" },
+    { "id": "m3", "name": "Volnewmer", "categoryId": "cat1" },
+    { "id": "m4", "name": "MRT", "categoryId": "cat1" }
+  ],
+  "bodyZones": [
+    { "id": "z1", "name": "ใบหน้าและลำคอ" },
+    { "id": "z2", "name": "ลำตัว" },
+    { "id": "z3", "name": "ทั่วตัว" },
+    { "id": "z4", "name": "ริ้วรอย" },
+    { "id": "z5", "name": "ทั่วหน้า" },
+    { "id": "z6", "name": "เฉพาะจุด" },
+    { "id": "z7", "name": "กรามและลิฟท์กรอบหน้าส่วนล่าง" },
+    { "id": "z8", "name": "ลำตัว" },
+    { "id": "z9", "name": "ออฟฟิศซินโดรม" },
+    { "id": "z10", "name": "ไมเกรน" }
+  ],
+  "bodyPositions": [
+    { "id": "p1", "zoneId": "z1", "name": "กรอบหน้าส่วนล่าง" },
+    { "id": "p2", "zoneId": "z1", "name": "คอ" },
+    { "id": "p3", "zoneId": "z1", "name": "เหนียง" },
+    { "id": "p4", "zoneId": "z2", "name": "ต้นขาด้านนอก" },
+    { "id": "p5", "zoneId": "z2", "name": "ต้นขาด้านใน" },
+    { "id": "p6", "zoneId": "z2", "name": "ต้นขาทั้งหมด" },
+    { "id": "p7", "zoneId": "z5", "name": "กรอบหน้าส่วนล่าง" },
+    { "id": "p8", "zoneId": "z5", "name": "กราม" },
+    { "id": "p9", "zoneId": "z5", "name": "หน้าผาก" },
+    { "id": "p10", "zoneId": "z8", "name": "แขน" },
+    { "id": "p11", "zoneId": "z8", "name": "ขา" }
+  ],
+  "injectTypes": [
+    { "id": "i1", "name": "BOTOX", "categoryId": "cat2" },
+    { "id": "i2", "name": "Filler", "categoryId": "cat2" },
+    { "id": "i3", "name": "Fat", "categoryId": "cat2" },
+    { "id": "i4", "name": "Skin Booster", "categoryId": "cat2" }
+  ],
+  "wellnessTypes": [
+    { "id": "w1", "name": "Slim pen", "categoryId": "cat3" },
+    { "id": "w2", "name": "IV Drip", "categoryId": "cat3" }
+  ],
+  "ivDripFormulas": [
+    { "id": "ivf1", "name": "V Bright Booster", "wellnessTypeId": "w2" },
+    { "id": "ivf2", "name": "V Healthy Booster / Recovery", "wellnessTypeId": "w2" }
+  ],
+  "ivDripSubFormulas": [
+    { "id": "ivsf1", "name": "Extra Perfect White", "formulaId": "ivf1" },
+    { "id": "ivsf2", "name": "Radiance Plus+", "formulaId": "ivf1" },
+    { "id": "ivsf3", "name": "Super Healthy Skin", "formulaId": "ivf1" },
+    { "id": "ivsf4", "name": "Skin Glow", "formulaId": "ivf1" },
+    { "id": "ivsf5", "name": "V Anti-Hangover/Plus+", "formulaId": "ivf2" },
+    { "id": "ivsf6", "name": "V Anti-Pollution", "formulaId": "ivf2" },
+    { "id": "ivsf7", "name": "V Anti-Diabetes", "formulaId": "ivf2" }
+  ],
+  "ivDripVolumes": [
+    { "id": "ivv1", "label": "100 mL", "value": 100, "unit": "mL" },
+    { "id": "ivv2", "label": "250 mL", "value": 250, "unit": "mL" },
+    { "id": "ivv3", "label": "500 mL", "value": 500, "unit": "mL" },
+    { "id": "ivv4", "label": "1000 mL", "value": 1000, "unit": "mL" }
+  ],
+  "ivDripRates": [
+    { "id": "ivr1", "label": "30 หยด/นาที", "value": 30, "unit": "หยด/นาที" },
+    { "id": "ivr2", "label": "40 หยด/นาที", "value": 40, "unit": "หยด/นาที" },
+    { "id": "ivr3", "label": "60 หยด/นาที", "value": 60, "unit": "หยด/นาที" },
+    { "id": "ivr4", "label": "80 หยด/นาที", "value": 80, "unit": "หยด/นาที" },
+    { "id": "ivr5", "label": "100 หยด/นาที", "value": 100, "unit": "หยด/นาที" }
+  ],
+  "laserTypes": [
+    { "id": "l1", "name": "Laser CO2", "categoryId": "cat4" },
+    { "id": "l2", "name": "Nd:YAG", "categoryId": "cat4" },
+    { "id": "l3", "name": "Picosecond", "categoryId": "cat4" },
+    { "id": "l4", "name": "Fraxel", "categoryId": "cat4" }
+  ],
+  "laserSubtypes": [
+    { "id": "ls1", "name": "LS", "laserTypeId": "l3" },
+    { "id": "ls2", "name": "Skin LS", "laserTypeId": "l3" }
+  ],
+  "laserProcedures": [
+    { "id": "lp1", "name": "Pico Discovery", "laserSubtypeId": "ls1" },
+    { "id": "lp2", "name": "Pico Sure Pro", "laserSubtypeId": "ls1" },
+    { "id": "lp3", "name": "Pico หน้าใส", "laserSubtypeId": "ls1" },
+    { "id": "lp4", "name": "Pico Majesty", "laserSubtypeId": "ls1" },
+    { "id": "lp5", "name": "Pico Discovery", "laserSubtypeId": "ls2" },
+    { "id": "lp6", "name": "Pico Sure Pro", "laserSubtypeId": "ls2" },
+    { "id": "lp7", "name": "Pico หน้าใส", "laserSubtypeId": "ls2" },
+    { "id": "lp8", "name": "Pico Majesty", "laserSubtypeId": "ls2" }
+  ],
+  "laserBodyZones": [
+    { "id": "lbz1", "zoneId": "z1", "laserTypeId": "l1" },
+    { "id": "lbz2", "zoneId": "z1", "laserTypeId": "l2" },
+    { "id": "lbz3", "zoneId": "z1", "laserTypeId": "l3" },
+    { "id": "lbz4", "zoneId": "z1", "laserTypeId": "l4" },
+    { "id": "lbz5", "zoneId": "z2", "laserTypeId": "l1" },
+    { "id": "lbz6", "zoneId": "z2", "laserTypeId": "l2" },
+    { "id": "lbz7", "zoneId": "z3", "laserTypeId": "l1" },
+    { "id": "lbz8", "zoneId": "z3", "laserTypeId": "l2" },
+    { "id": "lbz9", "zoneId": "z3", "laserTypeId": "l3" }
+  ],
+  "laserBodyPositions": [
+    { "id": "lbp1", "zoneId": "z1", "name": "กรอบหน้าส่วนล่าง" },
+    { "id": "lbp2", "zoneId": "z1", "name": "คอ" },
+    { "id": "lbp3", "zoneId": "z1", "name": "เหนียง" },
+    { "id": "lbp4", "zoneId": "z2", "name": "ต้นขาด้านนอก" },
+    { "id": "lbp5", "zoneId": "z2", "name": "ต้นขาด้านใน" },
+    { "id": "lbp6", "zoneId": "z2", "name": "ต้นขาทั้งหมด" }
+  ],
+  "laserSettingKeys": [
+    { "id": "lk1", "key": "P", "unit": "mJ" },
+    { "id": "lk2", "key": "F", "unit": "Hz" },
+    { "id": "lk3", "key": "Shot", "unit": "shots" }
+  ],
+  "injectBodyZones": [
+    { "id": "ibz1", "injectTypeId": "i1", "zoneId": "z4" },
+    { "id": "ibz2", "injectTypeId": "i1", "zoneId": "z5" },
+    { "id": "ibz3", "injectTypeId": "i1", "zoneId": "z6" },
+    { "id": "ibz4", "injectTypeId": "i1", "zoneId": "z7" },
+    { "id": "ibz5", "injectTypeId": "i1", "zoneId": "z8" },
+    { "id": "ibz6", "injectTypeId": "i1", "zoneId": "z9" },
+    { "id": "ibz7", "injectTypeId": "i1", "zoneId": "z10" },
+    { "id": "ibz8", "injectTypeId": "i2", "zoneId": "z4" },
+    { "id": "ibz9", "injectTypeId": "i2", "zoneId": "z5" },
+    { "id": "ibz10", "injectTypeId": "i2", "zoneId": "z6" },
+    { "id": "ibz11", "injectTypeId": "i2", "zoneId": "z7" },
+    { "id": "ibz12", "injectTypeId": "i2", "zoneId": "z8" },
+    { "id": "ibz13", "injectTypeId": "i3", "zoneId": "z4" },
+    { "id": "ibz14", "injectTypeId": "i3", "zoneId": "z5" },
+    { "id": "ibz15", "injectTypeId": "i3", "zoneId": "z8" },
+    { "id": "ibz16", "injectTypeId": "i4", "zoneId": "z4" },
+    { "id": "ibz17", "injectTypeId": "i4", "zoneId": "z5" },
+    { "id": "ibz18", "injectTypeId": "i4", "zoneId": "z6" }
+  ],
+  "settingKeys": [
+    { "id": "k1", "key": "1.5mm", "unit": "shots" },
+    { "id": "k2", "key": "3.0mm", "unit": "shots" },
+    { "id": "k3", "key": "4.5mm", "unit": "shots" },
+    { "id": "k4", "key": "Energy", "unit": "J" },
+    { "id": "k5", "key": "Frequency", "unit": "Hz" }
+  ],
+  "machineSettingMap": [
+    { "id": "ms1", "machineId": "m1", "settingKeyId": "k1" },
+    { "id": "ms2", "machineId": "m1", "settingKeyId": "k2" },
+    { "id": "ms3", "machineId": "m1", "settingKeyId": "k3" },
+    { "id": "ms4", "machineId": "m2", "settingKeyId": "k1" },
+    { "id": "ms5", "machineId": "m2", "settingKeyId": "k2" },
+    { "id": "ms6", "machineId": "m2", "settingKeyId": "k3" },
+    { "id": "ms7", "machineId": "m3", "settingKeyId": "k1" },
+    { "id": "ms8", "machineId": "m3", "settingKeyId": "k2" },
+    { "id": "ms9", "machineId": "m4", "settingKeyId": "k4" },
+    { "id": "ms10", "machineId": "m4", "settingKeyId": "k5" }
+  ],
+  "opdRecords": [],
+  "procedures": [],
+  "procedureParticipants": []
+}

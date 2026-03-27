@@ -1,0 +1,508 @@
+/* =========================================
+   Filter Modal
+   ========================================= */
+
+/* Overlay */
+.filter-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 100;
+}
+
+/* Modal box */
+.filter-modal {
+  width: 100%;
+  max-width: 340px;
+  background-color: #ffffff;
+  border-radius: 28px;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 76px);
+  margin: auto;
+}
+
+/* Scrollable body */
+.filter-modal__scroll {
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ----- Header ----- */
+.filter-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 20px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.filter-modal__title {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.filter-modal__close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #444;
+  flex-shrink: 0;
+}
+
+.filter-modal__close-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ----- Body ----- */
+.filter-modal__body {
+  padding: 20px 20px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ----- Section ----- */
+.filter-modal__section-label {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 10px 0;
+}
+
+/* ----- Date Input ----- */
+.filter-modal__date-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.filter-modal__date-input {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  border: 1.5px solid #e8eef6;
+  background-color: #ffffff;
+  padding: 0 44px 0 16px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.filter-modal__date-input::placeholder {
+  color: #bbb;
+}
+
+.filter-modal__date-icon {
+  position: absolute;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  color: #888;
+  pointer-events: none;
+}
+
+.filter-modal__date-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ----- Branch Dropdown ----- */
+.filter-modal__branch-wrap {
+  position: relative;
+}
+
+.filter-modal__branch-trigger {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  border: 1.5px solid #e8eef6;
+  background-color: #ffffff;
+  padding: 0 44px 0 16px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  appearance: none;
+}
+
+.filter-modal__branch-trigger--placeholder {
+  color: #aaa;
+  font-weight: 400;
+}
+
+.filter-modal__branch-chevron {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  color: #888;
+  pointer-events: none;
+  transition: transform 0.2s;
+}
+
+.filter-modal__branch-chevron--open {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.filter-modal__branch-chevron svg {
+  width: 16px;
+  height: 16px;
+}
+
+.filter-modal__branch-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+  overflow: hidden;
+  z-index: 10;
+  max-height: 246px;
+  overflow-y: scroll;
+  padding: 8px 20px 8px 8px;
+  scrollbar-gutter: stable;
+  scrollbar-color: #3F8CFF #F4F4F5;
+  scrollbar-width: thin;
+}
+
+.filter-modal__branch-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.filter-modal__branch-dropdown::-webkit-scrollbar-track {
+  background: #F4F4F5;
+  border-radius: 999px;
+  margin: 10px 0;
+}
+
+.filter-modal__branch-dropdown::-webkit-scrollbar-thumb {
+  background: #3F8CFF;
+  border-radius: 999px;
+  border: 2px solid #F4F4F5;
+}
+
+.filter-modal__branch-option {
+  width: 100%;
+  padding: 11px 15px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #7D8592;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  display: block;
+}
+
+.filter-modal__branch-option:hover {
+  background-color: #f5f8ff;
+}
+
+.filter-modal__branch-option--selected {
+  font-weight: 700;
+  color: #0A1629;
+  background-color: #91929E1A;
+  border-radius: 14px;
+}
+
+/* ----- Checkbox List ----- */
+.filter-modal__checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.filter-modal__checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.filter-modal__checkbox-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 2px solid #d0d5dd;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.filter-modal__checkbox-item--checked .filter-modal__checkbox-box {
+  border-color: #0A1629;
+
+}
+
+.filter-modal__checkbox-box svg {
+  width: 12px;
+  height: 12px;
+  color: #3F8CFF;
+}
+
+.filter-modal__checkbox-label {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.filter-modal__view-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 18px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #3478f6;
+}
+
+.filter-modal__view-more-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ----- Participant Search ----- */
+.filter-modal__participant-wrap {
+  position: relative;
+}
+
+.filter-modal__participant-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.filter-modal__participant-search-icon {
+  position: absolute;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  color: #bbb;
+  pointer-events: none;
+}
+
+.filter-modal__participant-search-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.filter-modal__participant-search-input {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  border: 1.5px solid #e8eef6;
+  background-color: #ffffff;
+  padding: 0 16px 0 40px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+}
+
+.filter-modal__participant-search-input::placeholder {
+  color: #bbb;
+}
+
+/* Participant dropdown list — opens upward */
+.filter-modal__participant-dropdown {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  top: auto;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.10);
+  z-index: 10;
+  max-height: 230px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  scrollbar-color: #3F8CFF #F4F4F5;
+  scrollbar-width: thin;
+  padding: 6px 20px 6px 8px;
+}
+
+.filter-modal__participant-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.filter-modal__participant-dropdown::-webkit-scrollbar-track {
+  background: #F4F4F5;
+  border-radius: 999px;
+  margin: 10px 0;
+}
+
+.filter-modal__participant-dropdown::-webkit-scrollbar-thumb {
+  background: #3F8CFF;
+  border-radius: 999px;
+  border: 2px solid #F4F4F5;
+}
+
+.filter-modal__participant-option {
+  width: 100%;
+  padding: 11px 15px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #7D8592;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  display: block;
+  border-radius: 10px;
+}
+
+.filter-modal__participant-option:hover {
+  background-color: #f5f8ff;
+}
+
+.filter-modal__participant-option--selected {
+  font-weight: 700;
+  color: #0A1629;
+  background-color: #f0f2f5;
+  margin-bottom: 2px;
+}
+
+/* Selected participant chips */
+.filter-modal__participant-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.filter-modal__participant-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f0f2f5;
+  border-radius: 100px;
+  padding: 5px 8px 5px 5px;
+  max-width: 48%;
+}
+
+.filter-modal__participant-chip-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: #ccd9f0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #3478f6;
+  overflow: hidden;
+}
+
+.filter-modal__participant-chip-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.filter-modal__participant-chip-name {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+
+.filter-modal__participant-chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #b0b8c8;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.filter-modal__participant-chip-remove svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* ----- Footer ----- */
+.filter-modal__footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px 24px;
+}
+
+.filter-modal__btn-clear {
+  flex: 1;
+  height: 50px;
+  border-radius: 14px;
+  border: 2px solid #e0e6ef;
+  background-color: #ffffff;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #555;
+  cursor: pointer;
+}
+
+.filter-modal__btn-confirm {
+  flex: 1;
+  height: 50px;
+  border-radius: 14px;
+  border: none;
+  background-color: #3478f6;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+}

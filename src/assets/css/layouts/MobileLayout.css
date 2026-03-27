@@ -1,0 +1,16 @@
+.mobile-layout {
+  height: 100%;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  /* background-color: #F4F9FD; */
+  background-color: #d5eefa;
+  padding: 24px;
+}
+
+.mobile-layout__container {
+  width: 100%;
+  max-width: 390px;
+  display: flex;
+  flex-direction: column;
+}
