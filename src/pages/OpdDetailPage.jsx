@@ -8,6 +8,7 @@ import {
   formatHmThailand,
   toThailandISOString,
   combineBangkokYmdWithClock,
+  diffBangkokDisplayedMinutes,
 } from '../config/thailandTime';
 import ProfileModal from '../components/ProfileModal';
 import customers from '../mock/customers.json';
@@ -32,7 +33,6 @@ const WELLNESS_TYPES = dbData.wellnessTypes;
 const LASER_TYPES = dbData.laserTypes;
 const LASER_SUBTYPES = dbData.laserSubtypes || [];
 const LASER_PROCEDURES = dbData.laserProcedures || [];
-const LASER_SETTING_KEYS = dbData.laserSettingKeys || [];
 
 /* Body zones/positions for machine procedures (z1–z3) */
 const MACHINE_BODY_ZONES = dbData.bodyZones.filter(z =>
@@ -210,19 +210,19 @@ function formatProcedureEndClock(proc) {
 
 function calcProcedureDuration(proc) {
   if (!proc.createdAt) return null;
-  const startMs = new Date(proc.createdAt).getTime();
-  let endMs = null;
+  let endRef = null;
   if (proc.status === 'เสร็จสิ้น') {
-    if (proc.endDate) endMs = new Date(proc.endDate).getTime();
+    if (proc.endDate) endRef = proc.endDate;
     else if (proc.endTime) {
       const iso = combineBangkokYmdWithClock(proc.createdAt, proc.endTime);
-      if (iso) endMs = new Date(iso).getTime();
+      if (iso) endRef = iso;
     }
   } else if (proc.status === 'กำลังทำ') {
-    endMs = getCurrentDateTime().getTime();
+    endRef = getCurrentDateTime();
   }
-  if (endMs === null || endMs < startMs) return null;
-  const mins = Math.round((endMs - startMs) / 60000);
+  if (!endRef) return null;
+  const mins = diffBangkokDisplayedMinutes(proc.createdAt, endRef);
+  if (mins < 0) return null;
   const h = Math.floor(mins / 60);
   const m = mins % 60;
   if (h > 0 && m > 0) return `${h}.${String(m).padStart(2, '0')} ชม.`;
@@ -702,81 +702,6 @@ function IVDripFlowRateModal({ selectedRate, onClose, onSave }) {
 }
 
 /* ─────────────────────────────────────────
-   Laser Settings Modal (per-position P/F/Shot)
-───────────────────────────────────────── */
-function LaserSettingsModal({ selectedPositions, savedSettings, onClose, onSave }) {
-  const initValues = () => {
-    const init = {};
-    selectedPositions.forEach(pos => {
-      const saved = savedSettings?.find(s => s.positionId === pos.id);
-      init[pos.id] = {
-        positionId: pos.id,
-        positionName: pos.name,
-        P: saved?.P || '',
-        F: saved?.F || '',
-        Shot: saved?.Shot || '',
-      };
-    });
-    return init;
-  };
-
-  const [values, setValues] = useState(initValues);
-
-  function updateField(posId, field, val) {
-    setValues(prev => ({ ...prev, [posId]: { ...prev[posId], [field]: val } }));
-  }
-
-  const allFilled = selectedPositions.every(pos => {
-    const v = values[pos.id];
-    return v && (v.P !== '' || v.F !== '' || v.Shot !== '');
-  });
-
-  function handleSave() {
-    const result = selectedPositions.map(pos => values[pos.id]);
-    onSave(result);
-  }
-
-  return (
-    <div className="inner-modal-overlay">
-      <div className="inner-modal inner-modal--laser-settings">
-        <div className="inner-modal__header">
-          <span className="inner-modal__step">ระบุการตั้งค่า</span>
-          <button className="inner-modal__close" onClick={onClose}><IconClose /></button>
-        </div>
-        <div className="inner-modal__body">
-          {selectedPositions.map(pos => (
-            <div key={pos.id} className="laser-setting-group">
-              <div className="laser-setting-group__title">{pos.name}</div>
-              <div className="laser-setting-group__fields">
-                {LASER_SETTING_KEYS.map(sk => (
-                  <div key={sk.id} className="laser-setting-field">
-                    <input
-                      type="number"
-                      placeholder="ระบุ"
-                      value={values[pos.id]?.[sk.key] || ''}
-                      onChange={e => updateField(pos.id, sk.key, e.target.value)}
-                      className="laser-setting-field__input"
-                    />
-                    <span className="laser-setting-field__unit">{sk.key}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-        <button
-          className="btn-primary"
-          onClick={handleSave}
-          disabled={!allFilled}
-        >
-          บันทึก
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────
    Procedure Detail Popup (full-page overlay)
 ───────────────────────────────────────── */
 function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }) {
@@ -841,10 +766,6 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
       : {}
   );
 
-  /* laser settings (per-position) */
-  const [laserSettings, setLaserSettings] = useState(proc.laserSettings || []);
-  const [showLaserSettings, setShowLaserSettings] = useState(false);
-
   /* QR scanner */
   const [showQR, setShowQR] = useState(false);
 
@@ -902,11 +823,9 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
       return pos?.zoneId === zoneId;
     });
   });
-  const hasSettings = isInject || isWellness
+  const hasSettings = isInject || isWellness || isLaser
     ? true
-    : isLaser
-      ? laserSettings.length > 0 && laserSettings.every(s => s.P !== '' || s.F !== '' || s.Shot !== '')
-      : Object.values(settings).some((v) => String(v).trim() !== '');
+    : Object.values(settings).some((v) => String(v).trim() !== '');
   const hasParticipants = participants.length > 0;
 
   const hasWaist = String(waist).trim() !== '';
@@ -956,7 +875,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
       selectedZones: isWellness ? [] : selectedZones,
       selectedPositions: isWellness ? [] : selectedPositions,
       settings: isInject || isWellness || isLaser ? {} : settings,
-      laserSettings: isLaser ? laserSettings : [],
+      laserSettings: [],
       ...(isSlimPen && { waist, startWeight, weight, muscle, fat, targetWeight, targetDurationMonths }),
       ...(isIVDrip && { ivFormula, ivSubFormula, ivVolume, ivFlowRate }),
       status: nextStatus,
@@ -1024,14 +943,6 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
           savedSettings={settings}
           onClose={() => setShowSettings(false)}
           onSave={(vals) => { setSettings(vals); setShowSettings(false); }}
-        />
-      )}
-      {showLaserSettings && isLaser && (
-        <LaserSettingsModal
-          selectedPositions={availablePositions.filter(p => selectedPositions.includes(p.id))}
-          savedSettings={laserSettings}
-          onClose={() => setShowLaserSettings(false)}
-          onSave={(vals) => { setLaserSettings(vals); setShowLaserSettings(false); }}
         />
       )}
       {showTargetWeightModal && isSlimPen && (
@@ -1340,38 +1251,6 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
                           const key = tag.split(' | ')[0];
                           setSettings(prev => ({ ...prev, [key]: '' }));
                         }}
-                      >×</button>
-                    )}
-                  </span>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Settings — laser only */}
-        {isLaser && selectedPositions.length > 0 && (
-          <>
-            <div className="proc-popup__field-label" style={{ marginTop: 14 }}>การตั้งค่า</div>
-            <button
-              type="button"
-              className={`proc-popup__select-btn ${showSettingsError ? 'proc-popup__select-btn--error' : ''}`}
-              onClick={() => !readOnly && setShowLaserSettings(true)}
-              disabled={readOnly}
-            >
-              <span>ระบุการตั้งค่า</span>
-              <IconChevronRight />
-            </button>
-            {laserSettings.length > 0 && (
-              <div className="proc-popup__tags">
-                {laserSettings.filter(s => s.P || s.F || s.Shot).map((s, i) => (
-                  <span key={i} className="proc-popup__tag">
-                    {s.positionName} {s.P ? `${s.P} P` : ''}{s.F ? ` | ${s.F} F` : ''}{s.Shot ? ` | ${s.Shot} Shot` : ''}
-                    {!readOnly && (
-                      <button
-                        type="button"
-                        className="proc-popup__tag-remove"
-                        onClick={() => setLaserSettings(prev => prev.filter((_, idx) => idx !== i))}
                       >×</button>
                     )}
                   </span>

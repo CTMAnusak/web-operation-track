@@ -74,6 +74,19 @@ export function combineBangkokYmdWithClock(referenceDateInput, hhmm) {
 }
 
 /**
+ * จำนวนนาทีระหว่างสองช่วงเวลา โดยใช้เฉพาะชั่วโมง:นาทีตามปฏิทินไทย (ไม่นับวินาที)
+ * ให้ตรงกับข้อความ "เริ่ม HH:mm ถึง HH:mm" ที่แสดงบนหน้าจอ
+ */
+export function diffBangkokDisplayedMinutes(startInput, endInput) {
+  const s = getThailandParts(startInput);
+  const e = getThailandParts(endInput);
+  const startIso = `${s.year}-${s.month}-${s.day}T${s.hour}:${s.minute}:00${BANGKOK_OFFSET}`;
+  const endIso = `${e.year}-${e.month}-${e.day}T${e.hour}:${e.minute}:00${BANGKOK_OFFSET}`;
+  const diffMs = new Date(endIso).getTime() - new Date(startIso).getTime();
+  return Math.floor(diffMs / 60000);
+}
+
+/**
  * "วันนี้" ตามปฏิทินไทย — คืน Date ที่แทนวันนั้น (เที่ยงวัน UTC+7) เพื่อใช้เปรียบเทียบช่วงวันที่
  */
 export function getBangkokCalendarDate(dateInput) {

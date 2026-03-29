@@ -1,5 +1,5 @@
 import branches from './branches.json';
-import { combineBangkokYmdWithClock } from '../config/thailandTime';
+import { combineBangkokYmdWithClock, diffBangkokDisplayedMinutes } from '../config/thailandTime';
 import roles from './roles.json';
 import users from '../../db.json';
 
@@ -62,17 +62,19 @@ export function calcTotalDuration(procedures = []) {
 
   for (const p of procedures) {
     if (p.status !== 'เสร็จสิ้น' || !p.createdAt) continue;
-    const startMs = new Date(p.createdAt).getTime();
-    let endMs = null;
+    let endRef = null;
     if (p.endDate) {
-      endMs = new Date(p.endDate).getTime();
+      endRef = p.endDate;
     } else if (p.endTime) {
       const iso = combineBangkokYmdWithClock(p.createdAt, p.endTime);
-      if (iso) endMs = new Date(iso).getTime();
+      if (iso) endRef = iso;
     }
-    if (endMs !== null && endMs >= startMs) {
-      totalMinutes += Math.round((endMs - startMs) / 60000);
-      hasAny = true;
+    if (endRef) {
+      const mins = diffBangkokDisplayedMinutes(p.createdAt, endRef);
+      if (mins >= 0) {
+        totalMinutes += mins;
+        hasAny = true;
+      }
     }
   }
 
