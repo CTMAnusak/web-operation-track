@@ -472,7 +472,7 @@ function MachineSettingsModal({ machineId, savedSettings, onClose, onSave }) {
 }
 
 /* ─────────────────────────────────────────
-   Target Weight Modal (Wellness)
+   Target Weight Modal (Wellness - Slim Pen)
 ───────────────────────────────────────── */
 function TargetWeightModal({ targetWeight, targetDurationMonths, onClose, onSave }) {
   const [weight, setWeight] = useState(targetWeight || '');
@@ -510,6 +510,162 @@ function TargetWeightModal({ targetWeight, targetDurationMonths, onClose, onSave
           disabled={!canSave}
         >
           บันทึก
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   IV Drip Formula Modal
+───────────────────────────────────────── */
+function IVDripFormulaModal({ selectedFormula, onClose, onSave }) {
+  const [selected, setSelected] = useState(selectedFormula || null);
+  const formulas = dbData.ivDripFormulas || [];
+
+  return (
+    <div className="inner-modal-overlay">
+      <div className="inner-modal">
+        <div className="inner-modal__header">
+          <span className="inner-modal__step">(1/2) เลือกโซนร่างกาย</span>
+          <button className="inner-modal__close" onClick={onClose}><IconClose /></button>
+        </div>
+        <div className="inner-modal__body">
+          {formulas.map(f => (
+            <label key={f.id} className={`zone-item ${selected?.id === f.id ? 'zone-item--selected' : ''}`}>
+              <span>{f.name}</span>
+              <input
+                type="checkbox"
+                checked={selected?.id === f.id}
+                onChange={() => setSelected(f)}
+                className="zone-item__checkbox"
+              />
+            </label>
+          ))}
+        </div>
+        <button
+          className="btn-primary"
+          onClick={() => onSave(selected)}
+          disabled={!selected}
+        >
+          ถัดไป
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   IV Drip Sub-Formula Modal
+───────────────────────────────────────── */
+function IVDripSubFormulaModal({ selectedFormulaId, selectedSubFormula, onClose, onSave }) {
+  const [selected, setSelected] = useState(selectedSubFormula || null);
+  const subFormulas = (dbData.ivDripSubFormulas || []).filter(sf => sf.formulaId === selectedFormulaId);
+
+  return (
+    <div className="inner-modal-overlay">
+      <div className="inner-modal">
+        <div className="inner-modal__header">
+          <span className="inner-modal__step">(1/2) เลือกโซนร่างกาย</span>
+          <button className="inner-modal__close" onClick={onClose}><IconClose /></button>
+        </div>
+        <div className="inner-modal__body">
+          {subFormulas.map(sf => (
+            <label key={sf.id} className={`zone-item ${selected?.id === sf.id ? 'zone-item--selected' : ''}`}>
+              <span>{sf.name}</span>
+              <input
+                type="checkbox"
+                checked={selected?.id === sf.id}
+                onChange={() => setSelected(sf)}
+                className="zone-item__checkbox"
+              />
+            </label>
+          ))}
+        </div>
+        <button
+          className="btn-primary"
+          onClick={() => onSave(selected)}
+          disabled={!selected}
+        >
+          ถัดไป
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   IV Drip Volume Modal
+───────────────────────────────────────── */
+function IVDripVolumeModal({ selectedVolume, onClose, onSave }) {
+  const [selected, setSelected] = useState(selectedVolume || null);
+  const volumes = dbData.ivDripVolumes || [];
+
+  return (
+    <div className="inner-modal-overlay">
+      <div className="inner-modal">
+        <div className="inner-modal__header">
+          <span className="inner-modal__step">(1/2) เลือกโซนร่างกาย</span>
+          <button className="inner-modal__close" onClick={onClose}><IconClose /></button>
+        </div>
+        <div className="inner-modal__body">
+          {volumes.map(v => (
+            <label key={v.id} className={`zone-item ${selected?.id === v.id ? 'zone-item--selected' : ''}`}>
+              <span>{v.label}</span>
+              <input
+                type="checkbox"
+                checked={selected?.id === v.id}
+                onChange={() => setSelected(v)}
+                className="zone-item__checkbox"
+              />
+            </label>
+          ))}
+        </div>
+        <button
+          className="btn-primary"
+          onClick={() => onSave(selected)}
+          disabled={!selected}
+        >
+          ถัดไป
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   IV Drip Flow Rate Modal
+───────────────────────────────────────── */
+function IVDripFlowRateModal({ selectedRate, onClose, onSave }) {
+  const [selected, setSelected] = useState(selectedRate || null);
+  const rates = dbData.ivDripRates || [];
+
+  return (
+    <div className="inner-modal-overlay">
+      <div className="inner-modal">
+        <div className="inner-modal__header">
+          <span className="inner-modal__step">(1/2) เลือกโซนร่างกาย</span>
+          <button className="inner-modal__close" onClick={onClose}><IconClose /></button>
+        </div>
+        <div className="inner-modal__body">
+          {rates.map(r => (
+            <label key={r.id} className={`zone-item ${selected?.id === r.id ? 'zone-item--selected' : ''}`}>
+              <span>{r.label}</span>
+              <input
+                type="checkbox"
+                checked={selected?.id === r.id}
+                onChange={() => setSelected(r)}
+                className="zone-item__checkbox"
+              />
+            </label>
+          ))}
+        </div>
+        <button
+          className="btn-primary"
+          onClick={() => onSave(selected)}
+          disabled={!selected}
+        >
+          ถัดไป
         </button>
       </div>
     </div>
@@ -599,6 +755,8 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
   const isWellness = proc.categoryId === 'cat3';
   const isLaser = proc.categoryId === 'cat4';
   const isMachine = proc.categoryId === 'cat1';
+  const isSlimPen = isWellness && proc.wellnessId === 'w1';
+  const isIVDrip = isWellness && proc.wellnessId === 'w2';
 
   /* Determine which zones/positions to use */
   const availableZones = isInject ? INJECT_ZONES_ALL : isLaser ? LASER_BODY_ZONES : MACHINE_BODY_ZONES;
@@ -617,7 +775,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
   const [removeParticipantId, setRemoveParticipantId] = useState(null);
 
-  /* Wellness-specific fields */
+  /* Wellness - Slim Pen fields */
   const [waist, setWaist] = useState(proc.waist || '');
   const [startWeight, setStartWeight] = useState(proc.startWeight || '');
   const [weight, setWeight] = useState(proc.weight || '');
@@ -626,6 +784,16 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
   const [targetWeight, setTargetWeight] = useState(proc.targetWeight || '');
   const [targetDurationMonths, setTargetDurationMonths] = useState(proc.targetDurationMonths || '');
   const [showTargetWeightModal, setShowTargetWeightModal] = useState(false);
+
+  /* Wellness - IV Drip fields */
+  const [ivFormula, setIVFormula] = useState(proc.ivFormula || null);
+  const [ivSubFormula, setIVSubFormula] = useState(proc.ivSubFormula || null);
+  const [ivVolume, setIVVolume] = useState(proc.ivVolume || null);
+  const [ivFlowRate, setIVFlowRate] = useState(proc.ivFlowRate || null);
+  const [showIVFormulaModal, setShowIVFormulaModal] = useState(false);
+  const [showIVSubFormulaModal, setShowIVSubFormulaModal] = useState(false);
+  const [showIVVolumeModal, setShowIVVolumeModal] = useState(false);
+  const [showIVFlowRateModal, setShowIVFlowRateModal] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -720,9 +888,16 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
   const hasTargetWeight = String(targetWeight).trim() !== '';
   const hasTargetDuration = String(targetDurationMonths).trim() !== '';
 
-  const isWellnessDataFilled = isWellness
+  const hasIVFormula = ivFormula !== null;
+  const hasIVSubFormula = ivSubFormula !== null;
+  const hasIVVolume = ivVolume !== null;
+  const hasIVFlowRate = ivFlowRate !== null;
+
+  const isWellnessDataFilled = isSlimPen
     ? (hasWaist && hasStartWeight && hasWeight && hasMuscle && hasFat && hasTargetWeight && hasTargetDuration)
-    : true;
+    : isIVDrip
+      ? (hasIVFormula && hasIVSubFormula && hasIVVolume && hasIVFlowRate)
+      : true;
 
   const isFormValid = hasPositions && hasSettings && hasParticipants && isWellnessDataFilled;
 
@@ -752,7 +927,8 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
       selectedPositions: isWellness ? [] : selectedPositions,
       settings: isInject || isWellness || isLaser ? {} : settings,
       laserSettings: isLaser ? laserSettings : [],
-      ...(isWellness && { waist, startWeight, weight, muscle, fat, targetWeight, targetDurationMonths }),
+      ...(isSlimPen && { waist, startWeight, weight, muscle, fat, targetWeight, targetDurationMonths }),
+      ...(isIVDrip && { ivFormula, ivSubFormula, ivVolume, ivFlowRate }),
       status: nextStatus,
     });
   }
@@ -828,7 +1004,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
           onSave={(vals) => { setLaserSettings(vals); setShowLaserSettings(false); }}
         />
       )}
-      {showTargetWeightModal && (
+      {showTargetWeightModal && isSlimPen && (
         <TargetWeightModal
           targetWeight={targetWeight}
           targetDurationMonths={targetDurationMonths}
@@ -837,6 +1013,48 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
             setTargetWeight(tw);
             setTargetDurationMonths(td);
             setShowTargetWeightModal(false);
+          }}
+        />
+      )}
+      {showIVFormulaModal && isIVDrip && (
+        <IVDripFormulaModal
+          selectedFormula={ivFormula}
+          onClose={() => setShowIVFormulaModal(false)}
+          onSave={(formula) => {
+            setIVFormula(formula);
+            setIVSubFormula(null);
+            setShowIVFormulaModal(false);
+          }}
+        />
+      )}
+      {showIVSubFormulaModal && isIVDrip && ivFormula && (
+        <IVDripSubFormulaModal
+          selectedFormulaId={ivFormula.id}
+          selectedSubFormula={ivSubFormula}
+          onClose={() => setShowIVSubFormulaModal(false)}
+          onSave={(subFormula) => {
+            setIVSubFormula(subFormula);
+            setShowIVSubFormulaModal(false);
+          }}
+        />
+      )}
+      {showIVVolumeModal && isIVDrip && (
+        <IVDripVolumeModal
+          selectedVolume={ivVolume}
+          onClose={() => setShowIVVolumeModal(false)}
+          onSave={(volume) => {
+            setIVVolume(volume);
+            setShowIVVolumeModal(false);
+          }}
+        />
+      )}
+      {showIVFlowRateModal && isIVDrip && (
+        <IVDripFlowRateModal
+          selectedRate={ivFlowRate}
+          onClose={() => setShowIVFlowRateModal(false)}
+          onSave={(rate) => {
+            setIVFlowRate(rate);
+            setShowIVFlowRateModal(false);
           }}
         />
       )}
@@ -859,8 +1077,8 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
       <div className="proc-popup__section">
         <div className="proc-popup__section-title">รายละเอียด</div>
 
-        {/* Wellness fields */}
-        {isWellness && (
+        {/* Wellness - Slim Pen fields */}
+        {isSlimPen && (
           <>
             <div className="proc-popup__field-label">รอบเอว (นิ้ว)</div>
             <input
@@ -948,6 +1166,48 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
                 </div>
               </div>
             </div>
+          </>
+        )}
+
+        {/* Wellness - IV Drip fields */}
+        {isIVDrip && (
+          <>
+            <div className="proc-popup__field-label">สูตร</div>
+            <button
+              className={`proc-popup__select-btn ${saveAttempted && !hasIVFormula ? 'proc-popup__select-btn--error' : ''}`}
+              onClick={() => setShowIVFormulaModal(true)}
+            >
+              <span>{ivFormula ? ivFormula.name : 'เลือกสูตร'}</span>
+              <IconChevronRight />
+            </button>
+
+            <div className="proc-popup__field-label" style={{ marginTop: 14 }}>สูตรย่อย</div>
+            <button
+              className={`proc-popup__select-btn ${saveAttempted && !hasIVSubFormula ? 'proc-popup__select-btn--error' : ''}`}
+              onClick={() => ivFormula && setShowIVSubFormulaModal(true)}
+              disabled={!ivFormula}
+            >
+              <span>{ivSubFormula ? ivSubFormula.name : 'เลือกสูตรย่อย'}</span>
+              <IconChevronRight />
+            </button>
+
+            <div className="proc-popup__field-label" style={{ marginTop: 14 }}>ปริมาณ</div>
+            <button
+              className={`proc-popup__select-btn ${saveAttempted && !hasIVVolume ? 'proc-popup__select-btn--error' : ''}`}
+              onClick={() => setShowIVVolumeModal(true)}
+            >
+              <span>{ivVolume ? ivVolume.label : 'เลือกปริมาณ'}</span>
+              <IconChevronRight />
+            </button>
+
+            <div className="proc-popup__field-label" style={{ marginTop: 14 }}>อัตราการไหล</div>
+            <button
+              className={`proc-popup__select-btn ${saveAttempted && !hasIVFlowRate ? 'proc-popup__select-btn--error' : ''}`}
+              onClick={() => setShowIVFlowRateModal(true)}
+            >
+              <span>{ivFlowRate ? ivFlowRate.label : 'เลือกอัตราการไหล'}</span>
+              <IconChevronRight />
+            </button>
           </>
         )}
 
@@ -1450,6 +1710,8 @@ function getSettingLabel(proc) {
 function ProcedureCard({ proc, onDelete, onClick, canDeleteCard }) {
   const modifier = statusModifier(proc.status);
   const isWellness = proc.categoryId === 'cat3';
+  const isSlimPen = isWellness && proc.wellnessId === 'w1';
+  const isIVDrip = isWellness && proc.wellnessId === 'w2';
   const participants = proc.participants && proc.participants.length > 0
     ? proc.participants
     : getUsersByIds(proc.participantIds || []);
@@ -1464,7 +1726,7 @@ function ProcedureCard({ proc, onDelete, onClick, canDeleteCard }) {
         .map(p => p.name).join(', ')
     : proc.position || null;
 
-  /* Wellness labels */
+  /* Wellness - Slim Pen labels */
   const wellnessGoalLabel = proc.targetWeight
     ? `${proc.targetWeight} กก. ระยะเวลา ${proc.targetDurationMonths || '-'} เดือน`
     : '-';
@@ -1476,6 +1738,16 @@ function ProcedureCard({ proc, onDelete, onClick, canDeleteCard }) {
     if (proc.weight) parts.push(`น้ำหนัก ${proc.weight} กก.`);
     if (proc.muscle) parts.push(`กล้ามเนื้อ ${proc.muscle} กก.`);
     if (proc.fat) parts.push(`ไขมัน ${proc.fat}%`);
+    return parts.length > 0 ? parts.join(', ') : '-';
+  })();
+
+  /* Wellness - IV Drip labels */
+  const ivDripFormulaLabel = proc.ivFormula?.name || '-';
+  const ivDripDetailsLabel = (() => {
+    const parts = [];
+    if (proc.ivSubFormula?.name) parts.push(proc.ivSubFormula.name);
+    if (proc.ivVolume?.label) parts.push(proc.ivVolume.label);
+    if (proc.ivFlowRate?.label) parts.push(proc.ivFlowRate.label);
     return parts.length > 0 ? parts.join(', ') : '-';
   })();
 
@@ -1520,7 +1792,7 @@ function ProcedureCard({ proc, onDelete, onClick, canDeleteCard }) {
 
       <div className="proc-card__body">
         <div className="proc-card__col">
-          {isWellness ? (
+          {isSlimPen ? (
             <>
               <div className="proc-card__field-label">เป้าหมาย</div>
               <div className="proc-card__field-value">
@@ -1529,6 +1801,17 @@ function ProcedureCard({ proc, onDelete, onClick, canDeleteCard }) {
               <div className="proc-card__field-label" style={{ marginTop: 8 }}>องค์ประกอบร่างกาย</div>
               <div className="proc-card__field-value proc-card__field-value--small">
                 {wellnessBodyLabel.length > 30 ? wellnessBodyLabel.slice(0, 30) + '…' : wellnessBodyLabel}
+              </div>
+            </>
+          ) : isIVDrip ? (
+            <>
+              <div className="proc-card__field-label">สูตร</div>
+              <div className="proc-card__field-value">
+                {ivDripFormulaLabel.length > 24 ? ivDripFormulaLabel.slice(0, 24) + '…' : ivDripFormulaLabel}
+              </div>
+              <div className="proc-card__field-label" style={{ marginTop: 8 }}>รายละเอียด</div>
+              <div className="proc-card__field-value proc-card__field-value--small">
+                {ivDripDetailsLabel.length > 30 ? ivDripDetailsLabel.slice(0, 30) + '…' : ivDripDetailsLabel}
               </div>
             </>
           ) : (
@@ -1738,7 +2021,7 @@ function OpdDetailPage() {
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
 
-    const newProc = {
+    const baseProc = {
       id: `proc_${Date.now()}`,
       categoryId: 'cat3',
       wellnessId: wellnessType.id,
@@ -1748,15 +2031,28 @@ function OpdDetailPage() {
       endTime: null,
       note: '',
       participants: [],
-      waist: '',
-      startWeight: '',
-      weight: '',
-      muscle: '',
-      fat: '',
-      targetWeight: '',
-      targetDurationMonths: '',
       createdAt: now.toISOString(),
     };
+
+    const newProc = wellnessType.id === 'w1' 
+      ? {
+          ...baseProc,
+          waist: '',
+          startWeight: '',
+          weight: '',
+          muscle: '',
+          fat: '',
+          targetWeight: '',
+          targetDurationMonths: '',
+        }
+      : {
+          ...baseProc,
+          ivFormula: null,
+          ivSubFormula: null,
+          ivVolume: null,
+          ivFlowRate: null,
+        };
+
     setProcedures(prev => [...prev, newProc]);
     setShowWellnessSheet(false);
   }
