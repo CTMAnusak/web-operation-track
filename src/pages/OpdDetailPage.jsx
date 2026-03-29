@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import MobileLayout from '../layouts/MobileLayout';
-import { getBranchName, getDoctorNickname, getUsersByIds } from '../mock/dataHelpers';
+import { getBranchName, getDoctorNickname, getUsersByIds, getRoleName, getBranchFullName } from '../mock/dataHelpers';
+import ProfileModal from '../components/ProfileModal';
 import customers from '../mock/customers.json';
 import dbData from '../../db.json';
 import logoImg from '../assets/images/logo-vtrack.png';
@@ -88,6 +89,15 @@ function IconBack() {
 function IconUser() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+    </svg>
+  );
+}
+
+function IconUserSmall() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
     </svg>
@@ -1603,6 +1613,7 @@ function OpdDetailPage() {
   const [showLaserSheet, setShowLaserSheet] = useState(false);
   const [selectedCat, setSelectedCat] = useState(null);
   const [activeProcId, setActiveProcId] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const activeProcData = procedures.find(p => p.id === activeProcId);
 
@@ -1641,6 +1652,19 @@ function OpdDetailPage() {
 
   function handleBack() {
     navigate('/dashboard', { state: returnState ? { returnState } : undefined });
+  }
+
+  function handleAvatarClick() {
+    setProfileOpen(true);
+  }
+
+  function handleProfileClose() {
+    setProfileOpen(false);
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('currentUser');
+    navigate('/');
   }
 
   function handleFABClick() {
@@ -1827,9 +1851,17 @@ function OpdDetailPage() {
             <button className="opd-detail__topbar-icon-btn" aria-label="QR Code">
               <IconQR />
             </button>
-            <div className="opd-detail__topbar-avatar">
-              <img src={avatarImg} alt="โปรไฟล์ผู้ใช้" />
-            </div>
+            <button 
+              className={`opd-detail__topbar-avatar${!currentUser?.avatarUrl ? ' opd-detail__topbar-avatar--no-image' : ''}`}
+              onClick={handleAvatarClick}
+              aria-label="โปรไฟล์"
+            >
+              {currentUser?.avatarUrl ? (
+                <img src={currentUser.avatarUrl} alt="โปรไฟล์ผู้ใช้" />
+              ) : (
+                <IconUserSmall />
+              )}
+            </button>
           </div>
         </header>
 
@@ -1961,6 +1993,23 @@ function OpdDetailPage() {
           <LaserBottomSheet
             onClose={() => setShowLaserSheet(false)}
             onAdd={handleAddLaser}
+          />
+        )}
+
+        {/* Profile Modal */}
+        {profileOpen && (
+          <ProfileModal
+            user={{
+              fullName: currentUser?.fullName || '',
+              nickname: currentUser?.nickname || '',
+              role: currentUser?.role || getRoleName(currentUser?.roleId),
+              branchName: currentUser?.branch 
+                ? `สาขา${getBranchFullName(currentUser.branchId)} (${getBranchName(currentUser.branchId)})`
+                : `สาขา${getBranchFullName(currentUser?.branchId)} (${getBranchName(currentUser?.branchId)})`
+            }}
+            avatarUrl={currentUser?.avatarUrl}
+            onClose={handleProfileClose}
+            onLogout={handleLogout}
           />
         )}
       </div>

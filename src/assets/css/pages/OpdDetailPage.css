@@ -61,6 +61,18 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opd-detail__topbar-avatar--no-image {
+  background: #3F8CFF;
+  color: #FFFFFF;
 }
 
 .opd-detail__topbar-avatar img {

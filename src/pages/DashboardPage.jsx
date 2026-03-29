@@ -3,11 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import MobileLayout from '../layouts/MobileLayout';
 import { routePaths } from '../routes/routePaths';
 import FilterModal from '../components/FilterModal';
+import ProfileModal from '../components/ProfileModal';
 import logoImg from '../assets/images/logo-vtrack.png';
 import avatarImg from '../assets/images/avatar-user.png';
 import illustrationImg from '../assets/images/illustration-opd-empty.png';
 import customers from '../mock/customers.json';
-import { getBranchName, getDoctorNickname, getUsersByIds, calcTotalDuration } from '../mock/dataHelpers';
+import { getBranchName, getDoctorNickname, getUsersByIds, calcTotalDuration, getRoleName, getBranchFullName } from '../mock/dataHelpers';
 import '../assets/css/pages/dashboard.css';
 import '../assets/css/pages/OpdDetailPage.css';
 
@@ -60,6 +61,15 @@ function IconClose() {
 function IconUser() {
   return (
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+    </svg>
+  );
+}
+
+function IconUserSmall() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
     </svg>
@@ -404,7 +414,9 @@ function statusBadgeModifier(status) {
 }
 
 /* ---- Sub-components ---- */
-function DashboardHeader({ logoSrc, avatarSrc, selectedCustomer, onSearchClick, onQRClick, onClearSearch }) {
+function DashboardHeader({ logoSrc, avatarSrc, selectedCustomer, onSearchClick, onQRClick, onClearSearch, onAvatarClick }) {
+  const hasAvatar = avatarSrc && avatarSrc !== '';
+  
   return (
     <header className="dashboard__header">
       <div className="dashboard__header-logo">
@@ -437,9 +449,17 @@ function DashboardHeader({ logoSrc, avatarSrc, selectedCustomer, onSearchClick, 
         <button className="dashboard__header-icon-btn" aria-label="QR Code" onClick={onQRClick}>
           <IconQR />
         </button>
-        <div className="dashboard__header-avatar">
-          <img src={avatarSrc} alt="โปรไฟล์ผู้ใช้" />
-        </div>
+        <button 
+          className={`dashboard__header-avatar${!hasAvatar ? ' dashboard__header-avatar--no-image' : ''}`}
+          onClick={onAvatarClick}
+          aria-label="โปรไฟล์"
+        >
+          {hasAvatar ? (
+            <img src={avatarSrc} alt="โปรไฟล์ผู้ใช้" />
+          ) : (
+            <IconUserSmall />
+          )}
+        </button>
       </div>
     </header>
   );
@@ -597,6 +617,7 @@ function DashboardPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [qrOpen, setQROpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     const currentUser = localStorage.getItem('currentUser');
@@ -681,16 +702,30 @@ function DashboardPage() {
     setQROpen(false);
   }
 
+  function handleAvatarClick() {
+    setProfileOpen(true);
+  }
+
+  function handleProfileClose() {
+    setProfileOpen(false);
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('currentUser');
+    navigate(routePaths.login);
+  }
+
   return (
     <MobileLayout>
       <div className="dashboard">
         <DashboardHeader
           logoSrc={logoImg}
-          avatarSrc={avatarImg}
+          avatarSrc={user.avatarUrl || avatarImg}
           selectedCustomer={selectedCustomer}
           onSearchClick={handleSearchClick}
           onQRClick={handleQRClick}
           onClearSearch={handleClearSearch}
+          onAvatarClick={handleAvatarClick}
         />
 
         <main className="dashboard__body">
@@ -749,6 +784,20 @@ function DashboardPage() {
 
       {qrOpen && (
         <QRScannerOverlay onClose={handleQRClose} onScan={handleQRScan} />
+      )}
+
+      {profileOpen && (
+        <ProfileModal
+          user={{
+            fullName: user.fullName,
+            nickname: user.nickname,
+            role: user.role || getRoleName(user.roleId),
+            branchName: `สาขา${user.branch ? getBranchFullName(user.branchId) : getBranchFullName(user.branchId)} (${getBranchName(user.branchId)})`
+          }}
+          avatarUrl={user.avatarUrl}
+          onClose={handleProfileClose}
+          onLogout={handleLogout}
+        />
       )}
     </MobileLayout>
   );

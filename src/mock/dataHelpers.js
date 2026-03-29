@@ -7,6 +7,11 @@ export function getBranchName(branchId) {
   return branches.find((b) => b.id === branchId)?.name ?? branchId;
 }
 
+/** หา branch full name จาก branchId */
+export function getBranchFullName(branchId) {
+  return branches.find((b) => b.id === branchId)?.fullName ?? branchId;
+}
+
 /** หา role name จาก roleId */
 export function getRoleName(roleId) {
   return roles.find((r) => r.id === roleId)?.name ?? roleId;

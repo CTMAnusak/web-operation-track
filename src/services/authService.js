@@ -35,10 +35,12 @@ export const authService = {
           id: user.id,
           username: user.username,
           fullName: user.fullName,
+          nickname: user.nickname,
           branchId: user.branchId,
           branch: resolveBranchName(user.branchId),
           roleId: user.roleId,
           role: resolveRoleName(user.roleId),
+          avatarUrl: user.avatarUrl || null,
         },
       };
     } catch {
