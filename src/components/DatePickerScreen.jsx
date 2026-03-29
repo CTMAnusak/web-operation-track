@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getCurrentDate } from '../config/mockDateTime';
+import { formatThaiDateDmY, formatBangkokYmd } from '../config/thailandTime';
 import '../assets/css/components/DatePickerScreen.css';
 
 /* ---- Icons (Heroicons v2 outline) ---- */
@@ -59,14 +60,6 @@ function isSameDay(a, b) {
     && a.getDate() === b.getDate();
 }
 
-function formatThai(date) {
-  if (!date) return '';
-  const dd = String(date.getDate()).padStart(2, '0');
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const yyyy = date.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-}
-
 function buildCalendarCells(year, month) {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
@@ -92,6 +85,7 @@ function buildCalendarCells(year, month) {
 /* ---- DatePickerScreen ---- */
 function DatePickerScreen({ onBack, onSave, initialStart = null, initialEnd = null }) {
   const today = toDateOnly(getCurrentDate());
+  const todayBangkokYmd = formatBangkokYmd(getCurrentDate());
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [startDate, setStartDate] = useState(initialStart);
@@ -161,7 +155,7 @@ function DatePickerScreen({ onBack, onSave, initialStart = null, initialEnd = nu
               <input
                 className="date-picker-screen__range-input"
                 readOnly
-                value={formatThai(startDate)}
+                value={formatThaiDateDmY(startDate)}
                 placeholder="วว/ดด/ปปปป"
               />
               <span className="date-picker-screen__range-icon"><IconCalendarSmall /></span>
@@ -173,7 +167,7 @@ function DatePickerScreen({ onBack, onSave, initialStart = null, initialEnd = nu
               <input
                 className="date-picker-screen__range-input"
                 readOnly
-                value={formatThai(endDate)}
+                value={formatThaiDateDmY(endDate)}
                 placeholder="วว/ดด/ปปปป"
               />
               <span className="date-picker-screen__range-icon"><IconCalendarSmall /></span>
@@ -203,7 +197,7 @@ function DatePickerScreen({ onBack, onSave, initialStart = null, initialEnd = nu
             {cells.map((cell, idx) => {
               const modifier = getCellModifier(cell);
               const isOutside = cell.outside;
-              const isToday = isSameDay(toDateOnly(cell.date), today);
+              const isToday = !isOutside && formatBangkokYmd(cell.date) === todayBangkokYmd;
               let cellClass = 'date-picker-screen__cal-cell';
               if (isOutside) cellClass += ' date-picker-screen__cal-cell--outside';
               if (modifier) cellClass += ` date-picker-screen__cal-cell--${modifier}`;

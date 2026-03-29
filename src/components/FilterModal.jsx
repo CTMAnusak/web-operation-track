@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import DatePickerScreen from './DatePickerScreen';
 import branches from '../mock/branches.json';
+import { formatThaiDateDmY } from '../config/thailandTime';
 import { getDoctorUsers, getParticipantUsers } from '../mock/dataHelpers';
 import '../assets/css/components/FilterModal.css';
 
@@ -57,15 +58,6 @@ function IconXSmall() {
       <path d="M6 18 18 6M6 6l12 12" />
     </svg>
   );
-}
-
-/* ---- Helpers ---- */
-function formatThai(date) {
-  if (!date) return '';
-  const dd = String(date.getDate()).padStart(2, '0');
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const yyyy = date.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
 }
 
 /* ---- Static full lists (sorted once at module level) ---- */
@@ -129,7 +121,7 @@ function FilterModal({ onClose, onConfirm, onClear, initialFilter }) {
 
   const selectedBranch = BRANCHES_SORTED.find((b) => b.id === selectedBranchId);
   const dateDisplayValue = dateStart
-    ? `${formatThai(dateStart)} - ${formatThai(dateEnd ?? dateStart)}`
+    ? `${formatThaiDateDmY(dateStart)} - ${formatThaiDateDmY(dateEnd ?? dateStart)}`
     : '';
 
   /* reset doctor/participant selections when branch changes */

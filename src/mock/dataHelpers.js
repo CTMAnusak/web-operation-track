@@ -1,4 +1,5 @@
 import branches from './branches.json';
+import { combineBangkokYmdWithClock } from '../config/thailandTime';
 import roles from './roles.json';
 import users from '../../db.json';
 
@@ -51,27 +52,26 @@ export function getUsersByIds(ids = []) {
 
 /**
  * คำนวณเวลารวม (นาที) จาก procedures array
- * นับเฉพาะ procedure ที่มีทั้ง startTime และ endTime
- * คืนค่าเป็น { hours, minutes, hasAny }
- * hasAny = true หมายความว่ามีอย่างน้อย 1 procedure ที่ครบทั้ง startTime + endTime
+ * นับเฉพาะ procedure สถานะเสร็จสิ้น โดยใช้ createdAt เป็นเวลาเริ่ม และ endDate หรือ endTime เป็นเวลาจบ
  */
 export function calcTotalDuration(procedures = []) {
   if (!procedures || procedures.length === 0) return { hours: 0, minutes: 0, hasAny: false };
-
-  const parseTime = (t) => {
-    if (!t) return null;
-    const [h, m] = t.split(':').map(Number);
-    return h * 60 + m;
-  };
 
   let totalMinutes = 0;
   let hasAny = false;
 
   for (const p of procedures) {
-    const start = parseTime(p.startTime);
-    const end = parseTime(p.endTime);
-    if (start !== null && end !== null) {
-      totalMinutes += end - start;
+    if (p.status !== 'เสร็จสิ้น' || !p.createdAt) continue;
+    const startMs = new Date(p.createdAt).getTime();
+    let endMs = null;
+    if (p.endDate) {
+      endMs = new Date(p.endDate).getTime();
+    } else if (p.endTime) {
+      const iso = combineBangkokYmdWithClock(p.createdAt, p.endTime);
+      if (iso) endMs = new Date(iso).getTime();
+    }
+    if (endMs !== null && endMs >= startMs) {
+      totalMinutes += Math.round((endMs - startMs) / 60000);
       hasAny = true;
     }
   }

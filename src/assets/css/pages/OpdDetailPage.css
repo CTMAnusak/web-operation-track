@@ -1129,13 +1129,26 @@
 }
 
 .proc-popup__time-badge {
-  background: #e8f1ff;
-  color: #3F8CFF;
   border-radius: 100px;
   padding: 5px 14px;
   font-family: 'Nunito Sans', sans-serif;
   font-size: 13px;
   font-weight: 700;
+}
+
+.proc-popup__time-badge--in-progress {
+  background-color: #e8f1ff;
+  color: #3478f6;
+}
+
+.proc-popup__time-badge--done {
+  background-color: #eefbf3;
+  color: #3dba72;
+}
+
+.proc-popup__time-badge--pending {
+  background-color: #f5eeff;
+  color: #b86fe8;
 }
 
 .proc-popup__time-row {

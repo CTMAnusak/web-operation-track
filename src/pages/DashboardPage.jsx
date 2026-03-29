@@ -9,7 +9,14 @@ import avatarImg from '../assets/images/avatar-user.png';
 import illustrationImg from '../assets/images/illustration-opd-empty.png';
 import customers from '../mock/customers.json';
 import { getBranchName, getDoctorNickname, getUsersByIds, calcTotalDuration, getRoleName, getBranchFullName } from '../mock/dataHelpers';
-import { getCurrentDate, getCurrentDateTime } from '../config/mockDateTime';
+import { deriveCustomerDisplayStatus, getEffectiveProceduresForMetrics } from '../mock/procedureEffectiveStatus';
+import { getCurrentDate } from '../config/mockDateTime';
+import {
+  isSameBangkokCalendarDay,
+  formatThaiDateDmY,
+  formatBangkokYmd,
+  appointmentDmYToSortKey,
+} from '../config/thailandTime';
 import '../assets/css/pages/dashboard.css';
 import '../assets/css/pages/OpdDetailPage.css';
 
@@ -326,40 +333,16 @@ function QRScannerOverlay({ onClose, onScan }) {
   );
 }
 
-/* ---- Date helpers ---- */
-function parseThaiDate(str) {
-  if (!str) return null;
-  const [dd, mm, yyyy] = str.split('/');
-  if (!dd || !mm || !yyyy) return null;
-  return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
-}
-
-function formatThai(date) {
-  if (!date) return '';
-  const dd = String(date.getDate()).padStart(2, '0');
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const yyyy = date.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-}
-
-function isSameDay(a, b) {
-  if (!a || !b) return false;
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
+/* ---- Date helpers (ปฏิทินไทย / Asia/Bangkok) ---- */
 function buildDateLabel(dateStart, dateEnd) {
   if (!dateStart) return null;
   const today = getCurrentDate();
   const end = dateEnd ?? dateStart;
-  if (isSameDay(dateStart, end)) {
-    if (isSameDay(dateStart, today)) return 'วันนี้';
-    return formatThai(dateStart);
+  if (isSameBangkokCalendarDay(dateStart, end)) {
+    if (isSameBangkokCalendarDay(dateStart, today)) return 'วันนี้';
+    return formatThaiDateDmY(dateStart);
   }
-  return `${formatThai(dateStart)} - ${formatThai(end)}`;
+  return `${formatThaiDateDmY(dateStart)} - ${formatThaiDateDmY(end)}`;
 }
 
 /* ---- Filter logic ---- */
@@ -371,12 +354,11 @@ function applyFilters(list, filterState) {
     const start = filterState.dateStart;
     const end = filterState.dateEnd ?? filterState.dateStart;
     result = result.filter((c) => {
-      const d = parseThaiDate(c.appointmentDate);
-      if (!d) return false;
-      const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-      const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-      const dDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      return dDay >= startDay && dDay <= endDay;
+      const key = appointmentDmYToSortKey(c.appointmentDate);
+      if (!key) return false;
+      const startKey = formatBangkokYmd(start);
+      const endKey = formatBangkokYmd(end);
+      return key >= startKey && key <= endKey;
     });
   }
 
@@ -401,7 +383,7 @@ function computeSummaryFromList(list) {
     'เสร็จสิ้น': 'done',
   };
   return list.reduce((acc, c) => {
-    const key = statusMap[c.status] || 'pending';
+    const key = statusMap[deriveCustomerDisplayStatus(c)] || 'pending';
     acc.all += 1;
     acc[key] += 1;
     return acc;
@@ -517,9 +499,10 @@ function OpdEmptyState({ illustrationSrc }) {
 }
 
 function OpdCard({ customer, onClick }) {
-  const modifier = statusBadgeModifier(customer.status);
+  const displayStatus = deriveCustomerDisplayStatus(customer);
+  const modifier = statusBadgeModifier(displayStatus);
   const collaborators = getUsersByIds(customer.collaboratorIds || []);
-  const { hours, minutes, hasAny } = calcTotalDuration(customer.procedures || []);
+  const { hours, minutes, hasAny } = calcTotalDuration(getEffectiveProceduresForMetrics(customer));
 
   const durationLabel = hasAny && (hours > 0 || minutes > 0)
     ? `${hours > 0 ? `${hours}.${String(minutes).padStart(2, '0')}` : `0.${String(minutes).padStart(2, '0')}`} ชม.`
@@ -583,7 +566,7 @@ function OpdCard({ customer, onClick }) {
         </div>
         <div>
           <span className={`opd-card__status-badge opd-card__status-badge--${modifier}`}>
-            {customer.status}
+            {displayStatus}
           </span>
         </div>
       </div>
@@ -653,8 +636,8 @@ function DashboardPage() {
 
   /* ไอคอน filter จะเปลี่ยนสีเมื่อ user แก้ไข filter ให้ต่างจาก default */
   const isDefaultFilter = !activeFilter || (
-    isSameDay(activeFilter.dateStart, defaultFilter.dateStart) &&
-    isSameDay(activeFilter.dateEnd ?? activeFilter.dateStart, defaultFilter.dateEnd) &&
+    isSameBangkokCalendarDay(activeFilter.dateStart, defaultFilter.dateStart) &&
+    isSameBangkokCalendarDay(activeFilter.dateEnd ?? activeFilter.dateStart, defaultFilter.dateEnd) &&
     activeFilter.branchId === defaultFilter.branchId &&
     activeFilter.doctorIds.length === 0 &&
     activeFilter.participantIds.length === 0

@@ -2,9 +2,16 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import MobileLayout from '../layouts/MobileLayout';
 import { getBranchName, getDoctorNickname, getUsersByIds, getRoleName, getBranchFullName } from '../mock/dataHelpers';
-import { getCurrentDate, getCurrentDateTime } from '../config/mockDateTime';
+import { getCurrentDateTime } from '../config/mockDateTime';
+import {
+  formatClockThailand,
+  formatHmThailand,
+  toThailandISOString,
+  combineBangkokYmdWithClock,
+} from '../config/thailandTime';
 import ProfileModal from '../components/ProfileModal';
 import customers from '../mock/customers.json';
+import { applyAutoCompleteToProcedure } from '../mock/procedureEffectiveStatus';
 import dbData from '../../db.json';
 import logoImg from '../assets/images/logo-vtrack.png';
 import avatarImg from '../assets/images/avatar-user.png';
@@ -191,10 +198,31 @@ function statusModifier(status) {
   return 'pending';
 }
 
+function formatProcedureEndClock(proc) {
+  if (proc.endDate) return formatClockThailand(proc.endDate);
+  if (proc.endTime) {
+    const iso = combineBangkokYmdWithClock(proc.createdAt, proc.endTime);
+    if (iso) return formatClockThailand(iso);
+    return proc.endTime;
+  }
+  return null;
+}
+
 function calcProcedureDuration(proc) {
-  if (!proc.startTime || !proc.endTime) return null;
-  const parse = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-  const mins = parse(proc.endTime) - parse(proc.startTime);
+  if (!proc.createdAt) return null;
+  const startMs = new Date(proc.createdAt).getTime();
+  let endMs = null;
+  if (proc.status === 'เสร็จสิ้น') {
+    if (proc.endDate) endMs = new Date(proc.endDate).getTime();
+    else if (proc.endTime) {
+      const iso = combineBangkokYmdWithClock(proc.createdAt, proc.endTime);
+      if (iso) endMs = new Date(iso).getTime();
+    }
+  } else if (proc.status === 'กำลังทำ') {
+    endMs = getCurrentDateTime().getTime();
+  }
+  if (endMs === null || endMs < startMs) return null;
+  const mins = Math.round((endMs - startMs) / 60000);
   const h = Math.floor(mins / 60);
   const m = mins % 60;
   if (h > 0 && m > 0) return `${h}.${String(m).padStart(2, '0')} ชม.`;
@@ -207,7 +235,7 @@ const DELETABLE_ROLE_IDS = ['r2', 'r3', 'r4'];
 
 function canDeleteProcCard(proc, currentUserRoleId) {
   if (!DELETABLE_ROLE_IDS.includes(currentUserRoleId)) return false;
-  if (proc.status === 'เสร็จสิ้น') return false;
+  if (proc.status === 'เสร็จสิ้น' && isCardOlderThanOneDay(proc)) return false;
   return true;
 }
 
@@ -751,7 +779,7 @@ function LaserSettingsModal({ selectedPositions, savedSettings, onClose, onSave 
 /* ─────────────────────────────────────────
    Procedure Detail Popup (full-page overlay)
 ───────────────────────────────────────── */
-function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
+function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }) {
   const isInject = proc.categoryId === 'cat2';
   const isWellness = proc.categoryId === 'cat3';
   const isLaser = proc.categoryId === 'cat4';
@@ -907,6 +935,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
   const showParticipantsError = saveAttempted && !hasParticipants;
 
   function handleSave() {
+    if (readOnly) return;
     setSaveAttempted(true);
     if (!isFormValid) return;
 
@@ -1088,6 +1117,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
               placeholder="ระบุรอบเอว"
               value={waist}
               onChange={e => setWaist(e.target.value)}
+              readOnly={readOnly}
             />
             <div className="proc-popup__field-label" style={{ marginTop: 14 }}>น้ำหนักเริ่มต้น (กก.)</div>
             <input
@@ -1096,6 +1126,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
               placeholder="ระบุน้ำหนักเริ่มต้น"
               value={startWeight}
               onChange={e => setStartWeight(e.target.value)}
+              readOnly={readOnly}
             />
             <div className="proc-popup__field-label" style={{ marginTop: 14 }}>น้ำหนักปัจจุบัน (กก.)</div>
             <input
@@ -1104,6 +1135,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
               placeholder="ระบุน้ำหนัก"
               value={weight}
               onChange={e => setWeight(e.target.value)}
+              readOnly={readOnly}
             />
             <div className="proc-popup__field-label" style={{ marginTop: 14 }}>กล้ามเนื้อ (กก.)</div>
             <input
@@ -1112,6 +1144,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
               placeholder="ระบุกล้ามเนื้อ"
               value={muscle}
               onChange={e => setMuscle(e.target.value)}
+              readOnly={readOnly}
             />
             <div className="proc-popup__field-label" style={{ marginTop: 14 }}>ไขมัน (%)</div>
             <input
@@ -1120,19 +1153,22 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
               placeholder="ระบุไขมัน (%)"
               value={fat}
               onChange={e => setFat(e.target.value)}
+              readOnly={readOnly}
             />
 
             {/* Target Weight Card */}
             <div className={`wellness-target-card ${saveAttempted && (!hasTargetWeight || !hasTargetDuration) ? 'wellness-target-card--error' : ''}`}>
               <div className="wellness-target-card__header">
                 <span className="wellness-target-card__title">น้ำหนักเป้าหมาย</span>
-                <button
-                  className="wellness-target-card__edit-btn"
-                  onClick={() => setShowTargetWeightModal(true)}
-                  aria-label="แก้ไขน้ำหนักเป้าหมาย"
-                >
-                  <IconEdit />
-                </button>
+                {!readOnly && (
+                  <button
+                    className="wellness-target-card__edit-btn"
+                    onClick={() => setShowTargetWeightModal(true)}
+                    aria-label="แก้ไขน้ำหนักเป้าหมาย"
+                  >
+                    <IconEdit />
+                  </button>
+                )}
               </div>
               <div className="wellness-target-card__body">
                 <div className="wellness-progress-circle">
@@ -1175,8 +1211,10 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
           <>
             <div className="proc-popup__field-label">สูตร</div>
             <button
+              type="button"
               className={`proc-popup__select-btn ${saveAttempted && !hasIVFormula ? 'proc-popup__select-btn--error' : ''}`}
-              onClick={() => setShowIVFormulaModal(true)}
+              onClick={() => !readOnly && setShowIVFormulaModal(true)}
+              disabled={readOnly}
             >
               <span>{ivFormula ? ivFormula.name : 'เลือกสูตร'}</span>
               <IconChevronRight />
@@ -1184,9 +1222,10 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
 
             <div className="proc-popup__field-label" style={{ marginTop: 14 }}>สูตรย่อย</div>
             <button
+              type="button"
               className={`proc-popup__select-btn ${saveAttempted && !hasIVSubFormula ? 'proc-popup__select-btn--error' : ''}`}
-              onClick={() => ivFormula && setShowIVSubFormulaModal(true)}
-              disabled={!ivFormula}
+              onClick={() => !readOnly && ivFormula && setShowIVSubFormulaModal(true)}
+              disabled={readOnly || !ivFormula}
             >
               <span>{ivSubFormula ? ivSubFormula.name : 'เลือกสูตรย่อย'}</span>
               <IconChevronRight />
@@ -1194,8 +1233,10 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
 
             <div className="proc-popup__field-label" style={{ marginTop: 14 }}>ปริมาณ</div>
             <button
+              type="button"
               className={`proc-popup__select-btn ${saveAttempted && !hasIVVolume ? 'proc-popup__select-btn--error' : ''}`}
-              onClick={() => setShowIVVolumeModal(true)}
+              onClick={() => !readOnly && setShowIVVolumeModal(true)}
+              disabled={readOnly}
             >
               <span>{ivVolume ? ivVolume.label : 'เลือกปริมาณ'}</span>
               <IconChevronRight />
@@ -1203,8 +1244,10 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
 
             <div className="proc-popup__field-label" style={{ marginTop: 14 }}>อัตราการไหล</div>
             <button
+              type="button"
               className={`proc-popup__select-btn ${saveAttempted && !hasIVFlowRate ? 'proc-popup__select-btn--error' : ''}`}
-              onClick={() => setShowIVFlowRateModal(true)}
+              onClick={() => !readOnly && setShowIVFlowRateModal(true)}
+              disabled={readOnly}
             >
               <span>{ivFlowRate ? ivFlowRate.label : 'เลือกอัตราการไหล'}</span>
               <IconChevronRight />
@@ -1217,8 +1260,10 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
           <>
             <div className="proc-popup__field-label">ตำแหน่งร่างกาย</div>
             <button
+              type="button"
               className={`proc-popup__select-btn ${showPositionError ? 'proc-popup__select-btn--error' : ''}`}
-              onClick={() => setBodyStep('zone')}
+              onClick={() => !readOnly && setBodyStep('zone')}
+              disabled={readOnly}
             >
               <span>เลือกตำแหน่งร่างกาย</span>
               <IconChevronRight />
@@ -1228,21 +1273,24 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
                 {positionTags.map(p => (
                   <span key={p.id} className="proc-popup__tag">
                     {p.name}
-                    <button
-                      className="proc-popup__tag-remove"
-                      onClick={() => {
-                        const remain = selectedPositions.filter((x) => x !== p.id);
-                        setSelectedPositions(remain);
-                        setSelectedZones((prevZones) => {
-                          const remainZoneIds = new Set(
-                            remain
-                              .map((id) => availablePositions.find((bp) => bp.id === id)?.zoneId)
-                              .filter(Boolean)
-                          );
-                          return prevZones.filter((zid) => remainZoneIds.has(zid));
-                        });
-                      }}
-                    >×</button>
+                    {!readOnly && (
+                      <button
+                        type="button"
+                        className="proc-popup__tag-remove"
+                        onClick={() => {
+                          const remain = selectedPositions.filter((x) => x !== p.id);
+                          setSelectedPositions(remain);
+                          setSelectedZones((prevZones) => {
+                            const remainZoneIds = new Set(
+                              remain
+                                .map((id) => availablePositions.find((bp) => bp.id === id)?.zoneId)
+                                .filter(Boolean)
+                            );
+                            return prevZones.filter((zid) => remainZoneIds.has(zid));
+                          });
+                        }}
+                      >×</button>
+                    )}
                   </span>
                 ))}
               </div>
@@ -1252,10 +1300,13 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
                 {zoneOnlyTags.map((z) => (
                   <span key={z.id} className="proc-popup__tag">
                     {z.name}
-                    <button
-                      className="proc-popup__tag-remove"
-                      onClick={() => setSelectedZones((prev) => prev.filter((x) => x !== z.id))}
-                    >×</button>
+                    {!readOnly && (
+                      <button
+                        type="button"
+                        className="proc-popup__tag-remove"
+                        onClick={() => setSelectedZones((prev) => prev.filter((x) => x !== z.id))}
+                      >×</button>
+                    )}
                   </span>
                 ))}
               </div>
@@ -1268,8 +1319,10 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
           <>
             <div className="proc-popup__field-label" style={{ marginTop: 14 }}>การตั้งค่า</div>
             <button
+              type="button"
               className={`proc-popup__select-btn ${showSettingsError ? 'proc-popup__select-btn--error' : ''}`}
-              onClick={() => setShowSettings(true)}
+              onClick={() => !readOnly && setShowSettings(true)}
+              disabled={readOnly}
             >
               <span>ระบุการตั้งค่า</span>
               <IconChevronRight />
@@ -1279,13 +1332,16 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
                 {settingTags.map((tag, i) => (
                   <span key={i} className="proc-popup__tag">
                     {tag}
-                    <button
-                      className="proc-popup__tag-remove"
-                      onClick={() => {
-                        const key = tag.split(' | ')[0];
-                        setSettings(prev => ({ ...prev, [key]: '' }));
-                      }}
-                    >×</button>
+                    {!readOnly && (
+                      <button
+                        type="button"
+                        className="proc-popup__tag-remove"
+                        onClick={() => {
+                          const key = tag.split(' | ')[0];
+                          setSettings(prev => ({ ...prev, [key]: '' }));
+                        }}
+                      >×</button>
+                    )}
                   </span>
                 ))}
               </div>
@@ -1298,8 +1354,10 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
           <>
             <div className="proc-popup__field-label" style={{ marginTop: 14 }}>การตั้งค่า</div>
             <button
+              type="button"
               className={`proc-popup__select-btn ${showSettingsError ? 'proc-popup__select-btn--error' : ''}`}
-              onClick={() => setShowLaserSettings(true)}
+              onClick={() => !readOnly && setShowLaserSettings(true)}
+              disabled={readOnly}
             >
               <span>ระบุการตั้งค่า</span>
               <IconChevronRight />
@@ -1309,10 +1367,13 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
                 {laserSettings.filter(s => s.P || s.F || s.Shot).map((s, i) => (
                   <span key={i} className="proc-popup__tag">
                     {s.positionName} {s.P ? `${s.P} P` : ''}{s.F ? ` | ${s.F} F` : ''}{s.Shot ? ` | ${s.Shot} Shot` : ''}
-                    <button
-                      className="proc-popup__tag-remove"
-                      onClick={() => setLaserSettings(prev => prev.filter((_, idx) => idx !== i))}
-                    >×</button>
+                    {!readOnly && (
+                      <button
+                        type="button"
+                        className="proc-popup__tag-remove"
+                        onClick={() => setLaserSettings(prev => prev.filter((_, idx) => idx !== i))}
+                      >×</button>
+                    )}
                   </span>
                 ))}
               </div>
@@ -1328,18 +1389,23 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
           onChange={e => setNote(e.target.value)}
           placeholder="กรอกรายละเอียดเพิ่มเติม (ถ้ามี)"
           rows={3}
+          readOnly={readOnly}
         />
 
-        <button className="btn-primary" style={{ marginTop: 14 }} onClick={handleSave}>บันทึก</button>
+        {!readOnly && (
+          <button type="button" className="btn-primary" style={{ marginTop: 14 }} onClick={handleSave}>บันทึก</button>
+        )}
       </div>
 
       {/* Participants */}
       <div className={`proc-popup__section ${showParticipantsError ? 'proc-popup__section--error' : ''}`}>
         <div className="proc-popup__participants-header">
           <span className="proc-popup__section-title">ผู้ร่วมทำหัตถการ</span>
-          <button className="proc-popup__add-participant" onClick={() => setShowQR(true)}>
-            <IconPlus />
-          </button>
+          {!readOnly && (
+            <button type="button" className="proc-popup__add-participant" onClick={() => setShowQR(true)}>
+              <IconPlus />
+            </button>
+          )}
         </div>
         {participants.length > 0 && (
           <div className="proc-popup__participant-list">
@@ -1350,12 +1416,15 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
                   <div className="participant-item__name">{u.fullName} ({u.nickname})</div>
                   <div className="participant-item__role">{u.role}</div>
                 </div>
-                <button
-                  className="participant-item__remove"
-                  onClick={() => removeParticipant(u.id)}
-                >
-                  <IconClose />
-                </button>
+                {!readOnly && (
+                  <button
+                    type="button"
+                    className="participant-item__remove"
+                    onClick={() => removeParticipant(u.id)}
+                  >
+                    <IconClose />
+                  </button>
+                )}
               </div>
             ))}
             {participants.length > 2 && (
@@ -1374,19 +1443,28 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete }) {
       <div className="proc-popup__section proc-popup__time-section">
         <div className="proc-popup__time-header">
           <span className="proc-popup__section-title">เวลาทำหัตถการ</span>
-          <span className="proc-popup__time-badge">กำลังทำ</span>
+          <span className={`proc-popup__time-badge proc-popup__time-badge--${statusModifier(proc.status)}`}>
+            {proc.status}
+          </span>
         </div>
         <div className="proc-popup__time-row">
           <IconClock />
           <span className="proc-popup__time-text">
-            0 ชม. 1 นาที
+            {calcProcedureDuration(proc) ?? (proc.status === 'รอดำเนินการ' ? '-' : '0 นาที')}
             <span className="proc-popup__time-hint">&nbsp;(ปกติ {proc.estimatedHours || 2} ชม.)</span>
           </span>
         </div>
-        <div className="proc-popup__time-sub">เริ่ม {proc.startTime} น. ถึง xx:xx น.</div>
-        <button className="btn-complete" onClick={() => setShowCompleteConfirm(true)}>
-          เสร็จสิ้นหัตถการ
-        </button>
+        <div className="proc-popup__time-sub">
+          เริ่ม {formatClockThailand(proc.createdAt)} น.
+          {proc.status === 'เสร็จสิ้น' && formatProcedureEndClock(proc)
+            ? ` ถึง ${formatProcedureEndClock(proc)} น.`
+            : ' ถึง xx:xx น.'}
+        </div>
+        {!readOnly && proc.status !== 'เสร็จสิ้น' && (
+          <button type="button" className="btn-complete" onClick={() => setShowCompleteConfirm(true)}>
+            เสร็จสิ้นหัตถการ
+          </button>
+        )}
       </div>
     </div>
   );
@@ -1852,7 +1930,7 @@ function ProcedureCard({ proc, onDelete, onClick, canDeleteCard }) {
 
       <div className="proc-card__footer">
         <div className="proc-card__time-row">
-          <span className="proc-card__time-start">เริ่ม {proc.startTime} น.</span>
+          <span className="proc-card__time-start">เริ่ม {formatClockThailand(proc.createdAt)} น.</span>
           <span className="proc-card__time-sep"><IconClock /></span>
           <span className="proc-card__time-duration">{durationLabel ?? '- ชม.'}</span>
         </div>
@@ -1904,27 +1982,10 @@ function OpdDetailPage() {
   /* auto complete: in-progress card older than estimatedHours */
   useEffect(() => {
     const checkAndAutoComplete = () => {
-      const now = getCurrentDateTime().getTime();
+      const now = getCurrentDateTime();
       setProcedures((prev) => {
-        let changed = false;
-        const next = prev.map((p) => {
-          if (p.status !== 'กำลังทำ' || !p.createdAt) return p;
-          const createdAtMs = new Date(p.createdAt).getTime();
-          const estimateHours = Number(p.estimatedHours || 2);
-          const dueMs = createdAtMs + estimateHours * 60 * 60 * 1000;
-          if (now < dueMs) return p;
-
-          changed = true;
-          const endDateObj = new Date(dueMs);
-          const hh = String(endDateObj.getHours()).padStart(2, '0');
-          const mm = String(endDateObj.getMinutes()).padStart(2, '0');
-          return {
-            ...p,
-            status: 'เสร็จสิ้น',
-            endDate: endDateObj.toISOString(),
-            endTime: `${hh}:${mm}`,
-          };
-        });
+        const next = prev.map((p) => applyAutoCompleteToProcedure(p, now));
+        const changed = next.some((p, i) => p !== prev[i]);
         return changed ? next : prev;
       });
     };
@@ -1971,8 +2032,6 @@ function OpdDetailPage() {
 
   function handleAddMachine(machine) {
     const now = getCurrentDateTime();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
 
     const newProc = {
       id: `proc_${now.getTime()}`,
@@ -1980,14 +2039,13 @@ function OpdDetailPage() {
       machineId: machine.id,
       machineName: machine.name,
       status: 'รอดำเนินการ',
-      startTime: `${hh}:${mm}`,
       endTime: null,
       note: '',
       participants: [],
       selectedZones: [],
       selectedPositions: [],
       settings: {},
-      createdAt: now.toISOString(),
+      createdAt: toThailandISOString(now),
     };
     setProcedures(prev => [...prev, newProc]);
     setShowMachineSheet(false);
@@ -1995,8 +2053,6 @@ function OpdDetailPage() {
 
   function handleAddInject(injectType) {
     const now = getCurrentDateTime();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
 
     const newProc = {
       id: `proc_${now.getTime()}`,
@@ -2004,14 +2060,13 @@ function OpdDetailPage() {
       injectId: injectType.id,
       injectName: injectType.name,
       status: 'รอดำเนินการ',
-      startTime: `${hh}:${mm}`,
       endTime: null,
       note: '',
       participants: [],
       selectedZones: [],
       selectedPositions: [],
       settings: {},
-      createdAt: now.toISOString(),
+      createdAt: toThailandISOString(now),
     };
     setProcedures(prev => [...prev, newProc]);
     setShowInjectSheet(false);
@@ -2019,8 +2074,6 @@ function OpdDetailPage() {
 
   function handleAddWellness(wellnessType) {
     const now = getCurrentDateTime();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
 
     const baseProc = {
       id: `proc_${now.getTime()}`,
@@ -2028,11 +2081,10 @@ function OpdDetailPage() {
       wellnessId: wellnessType.id,
       wellnessName: wellnessType.name,
       status: 'รอดำเนินการ',
-      startTime: `${hh}:${mm}`,
       endTime: null,
       note: '',
       participants: [],
-      createdAt: now.toISOString(),
+      createdAt: toThailandISOString(now),
     };
 
     const newProc = wellnessType.id === 'w1' 
@@ -2060,8 +2112,6 @@ function OpdDetailPage() {
 
   function handleAddLaser({ subtype, procedure }) {
     const now = getCurrentDateTime();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
 
     const newProc = {
       id: `proc_${now.getTime()}`,
@@ -2071,14 +2121,13 @@ function OpdDetailPage() {
       laserProcId: procedure.id,
       laserProcName: procedure.name,
       status: 'รอดำเนินการ',
-      startTime: `${hh}:${mm}`,
       endTime: null,
       note: '',
       participants: [],
       selectedZones: [],
       selectedPositions: [],
       laserSettings: [],
-      createdAt: now.toISOString(),
+      createdAt: toThailandISOString(now),
     };
     setProcedures(prev => [...prev, newProc]);
     setShowLaserSheet(false);
@@ -2089,8 +2138,6 @@ function OpdDetailPage() {
   }
 
   function handleOpenProc(proc) {
-    /* การ์ดเสร็จสิ้นที่สร้างมาเกิน 1 วัน → ไม่สามารถแก้ไขได้ */
-    if (proc.status === 'เสร็จสิ้น' && isCardOlderThanOneDay(proc)) return;
     setActiveProcId(proc.id);
   }
 
@@ -2101,11 +2148,14 @@ function OpdDetailPage() {
 
   function handleProcComplete(id) {
     const now = getCurrentDateTime();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
     setProcedures(prev => prev.map(p =>
       p.id === id
-        ? { ...p, status: 'เสร็จสิ้น', endTime: `${hh}:${mm}`, endDate: now.toISOString() }
+        ? {
+            ...p,
+            status: 'เสร็จสิ้น',
+            endTime: formatHmThailand(now),
+            endDate: toThailandISOString(now),
+          }
         : p
     ));
     setActiveProcId(null);
@@ -2121,6 +2171,8 @@ function OpdDetailPage() {
 
   /* if viewing proc detail, show full-page popup */
   if (activeProcData) {
+    const procDetailReadOnly =
+      activeProcData.status === 'เสร็จสิ้น' && isCardOlderThanOneDay(activeProcData);
     return (
       <MobileLayout>
         <ProcDetailPopup
@@ -2128,6 +2180,7 @@ function OpdDetailPage() {
           onClose={() => setActiveProcId(null)}
           onSave={handleProcSave}
           onComplete={handleProcComplete}
+          readOnly={procDetailReadOnly}
         />
       </MobileLayout>
     );
