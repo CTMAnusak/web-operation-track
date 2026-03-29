@@ -231,84 +231,82 @@ function SearchOverlay({ onClose, onSelect }) {
   );
 }
 
-/* ---- QR Scanner Overlay ---- */
-function QRScannerOverlay({ onClose, onScan }) {
-  const videoRef = useRef(null);
+/* ---- QRScannerModal สำหรับสแกนค้นหาลูกค้า ---- */
+function QRScannerModal({ onClose, onScan }) {
   const [scanning, setScanning] = useState(true);
   const [cameraError, setCameraError] = useState('');
+  const [cameraReady, setCameraReady] = useState(false);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
 
   useEffect(() => {
-    let stream = null;
-
-    async function startCamera() {
+    let mounted = true;
+    async function initCamera() {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false,
         });
+        if (!mounted) return;
+        streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+          await videoRef.current.play();
         }
+        setCameraReady(true);
       } catch (err) {
-        setCameraError('ไม่สามารถเข้าถึงกล้องได้');
+        setCameraError('ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการใช้งานกล้อง');
       }
     }
-
-    startCamera();
-
+    initCamera();
     return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+      mounted = false;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
       }
     };
   }, []);
 
   useEffect(() => {
-    if (!scanning) return;
-    const timer = setTimeout(() => {
+    if (!cameraReady || !scanning) return;
+    const t = setTimeout(() => {
       setScanning(false);
-      const mockHN = '62173489';
-      const customer = customers.find(c => c.hn === mockHN);
-      if (customer) {
-        setTimeout(() => {
-          onScan(customer);
-        }, 500);
-      }
+      onScan('62173489');
     }, 2000);
-    return () => clearTimeout(timer);
-  }, [scanning, onScan]);
+    return () => clearTimeout(t);
+  }, [cameraReady, scanning, onScan]);
 
   return (
-    <div className="qr-scanner-fullscreen-overlay">
-      <div className="qr-modal">
-        <div className="qr-modal__topnav">
-          <button className="opd-detail__back-btn" onClick={onClose}>
-            <IconBack />
-            <span>กลับหน้าหลัก</span>
-          </button>
-        </div>
-        <div className="qr-modal__body">
-          <h2 className="qr-modal__title">ค้นหาผู้ร่วมทำหัตถการ</h2>
-          <div className="qr-modal__frame">
-            <div className="qr-corner qr-corner--tl" />
-            <div className="qr-corner qr-corner--tr" />
-            <div className="qr-corner qr-corner--bl" />
-            <div className="qr-corner qr-corner--br" />
-            {scanning ? (
-              <div className="qr-modal__placeholder">
-                <video ref={videoRef} className="qr-modal__video" autoPlay playsInline muted />
-                <div className="qr-modal__scan-line" />
-                {cameraError && <div className="qr-modal__camera-error">{cameraError}</div>}
-              </div>
-            ) : (
-              <div className="qr-modal__found">
-                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#3F8CFF" strokeWidth="2">
-                  <path d="M9 12l2 2 4-4" />
-                  <circle cx="12" cy="12" r="9" />
-                </svg>
-                <p>พบผู้ใช้แล้ว</p>
-              </div>
-            )}
-          </div>
+    <div className="qr-modal">
+      <div className="qr-modal__topnav">
+        <button className="opd-detail__back-btn" onClick={onClose}>
+          <IconBack />
+          <span>กลับหน้าหลัก</span>
+        </button>
+      </div>
+      <div className="qr-modal__body">
+        <h2 className="qr-modal__title">ค้นหาผู้ร่วมทำหัตถการ</h2>
+        <div className="qr-modal__frame">
+          <div className="qr-corner qr-corner--tl" />
+          <div className="qr-corner qr-corner--tr" />
+          <div className="qr-corner qr-corner--bl" />
+          <div className="qr-corner qr-corner--br" />
+          {scanning ? (
+            <div className="qr-modal__placeholder">
+              <video ref={videoRef} className="qr-modal__video" autoPlay playsInline muted />
+              <div className="qr-modal__scan-line" />
+              {cameraError && <div className="qr-modal__camera-error">{cameraError}</div>}
+            </div>
+          ) : (
+            <div className="qr-modal__found">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#3F8CFF" strokeWidth="2">
+                <path d="M9 12l2 2 4-4" />
+                <circle cx="12" cy="12" r="9" />
+              </svg>
+              <p>พบผู้ใช้แล้ว</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -434,7 +432,11 @@ function DashboardHeader({ logoSrc, avatarSrc, selectedCustomer, onSearchClick, 
             <IconSearch />
           </button>
         )}
-        <button className="dashboard__header-icon-btn" aria-label="QR Code" onClick={onQRClick}>
+        <button 
+          className="dashboard__header-icon-btn" 
+          aria-label="QR Code"
+          onClick={onQRClick}
+        >
           <IconQR />
         </button>
         <div className="dashboard__header-avatar">
@@ -596,7 +598,7 @@ function DashboardPage() {
   const [activeFilter, setActiveFilter] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [qrOpen, setQROpen] = useState(false);
+  const [qrScanOpen, setQrScanOpen] = useState(false);
 
   useEffect(() => {
     const currentUser = localStorage.getItem('currentUser');
@@ -658,6 +660,19 @@ function DashboardPage() {
     setSelectedCustomer(null);
   }
 
+  function handleQRClick() {
+    setQrScanOpen(true);
+  }
+
+  function handleQRScan(hn) {
+    const found = customers.find((c) => c.hn === hn);
+    if (found) {
+      setSelectedCustomer(found);
+      saveHistory(found.hn);
+    }
+    setQrScanOpen(false);
+  }
+
   function handleFilterConfirm(filterState) {
     setActiveFilter(filterState);
   }
@@ -665,20 +680,6 @@ function DashboardPage() {
   function handleFilterClear() {
     setActiveFilter(buildDefaultFilter(user));
     setFilterOpen(false);
-  }
-
-  function handleQRClick() {
-    setQROpen(true);
-  }
-
-  function handleQRClose() {
-    setQROpen(false);
-  }
-
-  function handleQRScan(customer) {
-    setSelectedCustomer(customer);
-    saveHistory(customer.hn);
-    setQROpen(false);
   }
 
   return (
@@ -747,8 +748,11 @@ function DashboardPage() {
         />
       )}
 
-      {qrOpen && (
-        <QRScannerOverlay onClose={handleQRClose} onScan={handleQRScan} />
+      {qrScanOpen && (
+        <QRScannerModal
+          onClose={() => setQrScanOpen(false)}
+          onScan={handleQRScan}
+        />
       )}
     </MobileLayout>
   );

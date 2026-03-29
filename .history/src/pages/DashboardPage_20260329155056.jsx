@@ -9,7 +9,6 @@ import illustrationImg from '../assets/images/illustration-opd-empty.png';
 import customers from '../mock/customers.json';
 import { getBranchName, getDoctorNickname, getUsersByIds, calcTotalDuration } from '../mock/dataHelpers';
 import '../assets/css/pages/dashboard.css';
-import '../assets/css/pages/OpdDetailPage.css';
 
 /* ---- Icons (Heroicons v2 outline) ---- */
 function IconSearch() {
@@ -231,90 +230,6 @@ function SearchOverlay({ onClose, onSelect }) {
   );
 }
 
-/* ---- QR Scanner Overlay ---- */
-function QRScannerOverlay({ onClose, onScan }) {
-  const videoRef = useRef(null);
-  const [scanning, setScanning] = useState(true);
-  const [cameraError, setCameraError] = useState('');
-
-  useEffect(() => {
-    let stream = null;
-
-    async function startCamera() {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
-        });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (err) {
-        setCameraError('ไม่สามารถเข้าถึงกล้องได้');
-      }
-    }
-
-    startCamera();
-
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!scanning) return;
-    const timer = setTimeout(() => {
-      setScanning(false);
-      const mockHN = '62173489';
-      const customer = customers.find(c => c.hn === mockHN);
-      if (customer) {
-        setTimeout(() => {
-          onScan(customer);
-        }, 500);
-      }
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [scanning, onScan]);
-
-  return (
-    <div className="qr-scanner-fullscreen-overlay">
-      <div className="qr-modal">
-        <div className="qr-modal__topnav">
-          <button className="opd-detail__back-btn" onClick={onClose}>
-            <IconBack />
-            <span>กลับหน้าหลัก</span>
-          </button>
-        </div>
-        <div className="qr-modal__body">
-          <h2 className="qr-modal__title">ค้นหาผู้ร่วมทำหัตถการ</h2>
-          <div className="qr-modal__frame">
-            <div className="qr-corner qr-corner--tl" />
-            <div className="qr-corner qr-corner--tr" />
-            <div className="qr-corner qr-corner--bl" />
-            <div className="qr-corner qr-corner--br" />
-            {scanning ? (
-              <div className="qr-modal__placeholder">
-                <video ref={videoRef} className="qr-modal__video" autoPlay playsInline muted />
-                <div className="qr-modal__scan-line" />
-                {cameraError && <div className="qr-modal__camera-error">{cameraError}</div>}
-              </div>
-            ) : (
-              <div className="qr-modal__found">
-                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#3F8CFF" strokeWidth="2">
-                  <path d="M9 12l2 2 4-4" />
-                  <circle cx="12" cy="12" r="9" />
-                </svg>
-                <p>พบผู้ใช้แล้ว</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ---- Date helpers ---- */
 function parseThaiDate(str) {
   if (!str) return null;
@@ -404,7 +319,7 @@ function statusBadgeModifier(status) {
 }
 
 /* ---- Sub-components ---- */
-function DashboardHeader({ logoSrc, avatarSrc, selectedCustomer, onSearchClick, onQRClick, onClearSearch }) {
+function DashboardHeader({ logoSrc, avatarSrc, selectedCustomer, onSearchClick, onClearSearch }) {
   return (
     <header className="dashboard__header">
       <div className="dashboard__header-logo">
@@ -434,7 +349,7 @@ function DashboardHeader({ logoSrc, avatarSrc, selectedCustomer, onSearchClick, 
             <IconSearch />
           </button>
         )}
-        <button className="dashboard__header-icon-btn" aria-label="QR Code" onClick={onQRClick}>
+        <button className="dashboard__header-icon-btn" aria-label="QR Code">
           <IconQR />
         </button>
         <div className="dashboard__header-avatar">
@@ -596,7 +511,6 @@ function DashboardPage() {
   const [activeFilter, setActiveFilter] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [qrOpen, setQROpen] = useState(false);
 
   useEffect(() => {
     const currentUser = localStorage.getItem('currentUser');
@@ -667,20 +581,6 @@ function DashboardPage() {
     setFilterOpen(false);
   }
 
-  function handleQRClick() {
-    setQROpen(true);
-  }
-
-  function handleQRClose() {
-    setQROpen(false);
-  }
-
-  function handleQRScan(customer) {
-    setSelectedCustomer(customer);
-    saveHistory(customer.hn);
-    setQROpen(false);
-  }
-
   return (
     <MobileLayout>
       <div className="dashboard">
@@ -689,7 +589,6 @@ function DashboardPage() {
           avatarSrc={avatarImg}
           selectedCustomer={selectedCustomer}
           onSearchClick={handleSearchClick}
-          onQRClick={handleQRClick}
           onClearSearch={handleClearSearch}
         />
 
@@ -745,10 +644,6 @@ function DashboardPage() {
           onClose={() => setSearchOpen(false)}
           onSelect={handleSearchSelect}
         />
-      )}
-
-      {qrOpen && (
-        <QRScannerOverlay onClose={handleQRClose} onScan={handleQRScan} />
       )}
     </MobileLayout>
   );

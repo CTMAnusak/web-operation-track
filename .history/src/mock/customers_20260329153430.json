@@ -21,7 +21,7 @@
         "participantIds": ["u6"],
         "participants": [],
         "startTime": "11:30",
-        "endTime": "12:00",
+        "endTime": null,
         "status": "กำลังทำ",
         "createdAt": "2026-03-27T11:30:00.000Z"
       },
