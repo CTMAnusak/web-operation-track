@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import MobileLayout from '../layouts/MobileLayout';
 import { getBranchName, getDoctorNickname, getUsersByIds, getRoleName, getBranchFullName } from '../mock/dataHelpers';
+import { getCurrentDate, getCurrentDateTime } from '../config/mockDateTime';
 import ProfileModal from '../components/ProfileModal';
 import customers from '../mock/customers.json';
 import dbData from '../../db.json';
@@ -213,7 +214,7 @@ function canDeleteProcCard(proc, currentUserRoleId) {
 function isCardOlderThanOneDay(proc) {
   const createdAt = proc.createdAt ? new Date(proc.createdAt) : null;
   if (!createdAt) return false;
-  const now = new Date();
+  const now = getCurrentDateTime();
   return (now - createdAt) > 24 * 60 * 60 * 1000;
 }
 
@@ -1903,7 +1904,7 @@ function OpdDetailPage() {
   /* auto complete: in-progress card older than estimatedHours */
   useEffect(() => {
     const checkAndAutoComplete = () => {
-      const now = Date.now();
+      const now = getCurrentDateTime().getTime();
       setProcedures((prev) => {
         let changed = false;
         const next = prev.map((p) => {
@@ -1969,12 +1970,12 @@ function OpdDetailPage() {
   }
 
   function handleAddMachine(machine) {
-    const now = new Date();
+    const now = getCurrentDateTime();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
 
     const newProc = {
-      id: `proc_${Date.now()}`,
+      id: `proc_${now.getTime()}`,
       categoryId: 'cat1',
       machineId: machine.id,
       machineName: machine.name,
@@ -1993,12 +1994,12 @@ function OpdDetailPage() {
   }
 
   function handleAddInject(injectType) {
-    const now = new Date();
+    const now = getCurrentDateTime();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
 
     const newProc = {
-      id: `proc_${Date.now()}`,
+      id: `proc_${now.getTime()}`,
       categoryId: 'cat2',
       injectId: injectType.id,
       injectName: injectType.name,
@@ -2017,12 +2018,12 @@ function OpdDetailPage() {
   }
 
   function handleAddWellness(wellnessType) {
-    const now = new Date();
+    const now = getCurrentDateTime();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
 
     const baseProc = {
-      id: `proc_${Date.now()}`,
+      id: `proc_${now.getTime()}`,
       categoryId: 'cat3',
       wellnessId: wellnessType.id,
       wellnessName: wellnessType.name,
@@ -2058,12 +2059,12 @@ function OpdDetailPage() {
   }
 
   function handleAddLaser({ subtype, procedure }) {
-    const now = new Date();
+    const now = getCurrentDateTime();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
 
     const newProc = {
-      id: `proc_${Date.now()}`,
+      id: `proc_${now.getTime()}`,
       categoryId: 'cat4',
       laserSubtypeId: subtype.id,
       laserSubtypeName: subtype.name,
@@ -2099,7 +2100,7 @@ function OpdDetailPage() {
   }
 
   function handleProcComplete(id) {
-    const now = new Date();
+    const now = getCurrentDateTime();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
     setProcedures(prev => prev.map(p =>

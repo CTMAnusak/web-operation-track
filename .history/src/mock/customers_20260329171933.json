@@ -97,22 +97,7 @@
     "appointmentDate": "03/03/2026",
     "appointmentTime": "09:00",
     "collaboratorIds": ["u11"],
-    "procedures": [
-      {
-        "id": "p4",
-        "categoryId": "cat2",
-        "injectId": "i2",
-        "injectName": "Filler",
-        "selectedZones": ["z4"],
-        "selectedPositions": [],
-        "participantIds": ["u9"],
-        "participants": [],
-        "startTime": "09:00",
-        "endTime": "09:45",
-        "status": "เสร็จสิ้น",
-        "createdAt": "2026-03-03T09:00:00.000Z"
-      }
-    ],
+    "procedures": [],
     "status": "กำลังทำ"
   },
   {
@@ -126,22 +111,7 @@
     "appointmentDate": "04/03/2026",
     "appointmentTime": "13:00",
     "collaboratorIds": ["u2", "u10", "u12"],
-    "procedures": [
-      {
-        "id": "p7",
-        "categoryId": "cat2",
-        "injectId": "i1",
-        "injectName": "BOTOX",
-        "selectedZones": ["z5"],
-        "selectedPositions": ["p9"],
-        "participantIds": ["u8"],
-        "participants": [],
-        "startTime": "13:00",
-        "endTime": "13:30",
-        "status": "กำลังทำ",
-        "createdAt": "2026-03-04T13:00:00.000Z"
-      }
-    ],
+    "procedures": [],
     "status": "กำลังทำ"
   }
 ]

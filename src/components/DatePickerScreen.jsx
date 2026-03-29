@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getCurrentDate } from '../config/mockDateTime';
 import '../assets/css/components/DatePickerScreen.css';
 
 /* ---- Icons (Heroicons v2 outline) ---- */
@@ -90,7 +91,7 @@ function buildCalendarCells(year, month) {
 
 /* ---- DatePickerScreen ---- */
 function DatePickerScreen({ onBack, onSave, initialStart = null, initialEnd = null }) {
-  const today = toDateOnly(new Date());
+  const today = toDateOnly(getCurrentDate());
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [startDate, setStartDate] = useState(initialStart);

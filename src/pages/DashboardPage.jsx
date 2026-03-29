@@ -9,6 +9,7 @@ import avatarImg from '../assets/images/avatar-user.png';
 import illustrationImg from '../assets/images/illustration-opd-empty.png';
 import customers from '../mock/customers.json';
 import { getBranchName, getDoctorNickname, getUsersByIds, calcTotalDuration, getRoleName, getBranchFullName } from '../mock/dataHelpers';
+import { getCurrentDate, getCurrentDateTime } from '../config/mockDateTime';
 import '../assets/css/pages/dashboard.css';
 import '../assets/css/pages/OpdDetailPage.css';
 
@@ -352,7 +353,7 @@ function isSameDay(a, b) {
 
 function buildDateLabel(dateStart, dateEnd) {
   if (!dateStart) return null;
-  const today = new Date();
+  const today = getCurrentDate();
   const end = dateEnd ?? dateStart;
   if (isSameDay(dateStart, end)) {
     if (isSameDay(dateStart, today)) return 'วันนี้';
@@ -592,11 +593,10 @@ function OpdCard({ customer, onClick }) {
 
 /* ---- Default filter builder ---- */
 function buildDefaultFilter(user) {
-  const today = new Date();
-  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const today = getCurrentDate();
   return {
-    dateStart: todayStart,
-    dateEnd: todayStart,
+    dateStart: today,
+    dateEnd: today,
     branchId: user?.branchId ?? '',
     doctorIds: [],
     participantIds: [],
