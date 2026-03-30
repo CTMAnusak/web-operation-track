@@ -1189,6 +1189,12 @@
   flex-direction: column;
   min-height: 100%;
   padding-bottom: 40px;
+  position: absolute;
+  inset: 0;
+  width: calc(100% - 48px);
+  height: calc(100% - 48px);
+  max-width: 100%;
+  margin: auto;
 }
 
 .qr-modal__topnav {

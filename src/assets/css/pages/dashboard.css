@@ -520,9 +520,16 @@
 /* =========================================
    Search Overlay (fixed, full-screen)
    ========================================= */
-
+.search-overlay-container, .qr-scanner-fullscreen-overlay-container {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 199;
+}
 .search-overlay {
   position: fixed;
+  max-width: 342px;
+  width: 100%;
   inset: 0;
   background-color: #F4F9FD;
   display: flex;
@@ -530,6 +537,8 @@
   z-index: 200;
   padding: 12px 16px;
   border-radius: 24px;
+  height: calc(100% - 48px);
+  margin: auto;
 }
 
 .search-overlay__topbar {
@@ -652,7 +661,6 @@
 /* =========================================
    QR Scanner Fullscreen Overlay
    ========================================= */
-
 .qr-scanner-fullscreen-overlay {
   position: fixed;
   inset: 0;
@@ -660,6 +668,10 @@
   z-index: 300;
   display: flex;
   flex-direction: column;
+  width: 342px;
+  height: calc(100% - 48px);
+  margin: auto;
+  border-radius: 24px;
 }
 
 .qr-scanner-fullscreen-overlay .qr-modal {
@@ -668,4 +680,5 @@
   margin: 0 auto;
   padding: 12px 16px;
   height: 100%;
+  
 }

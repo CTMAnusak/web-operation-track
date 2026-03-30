@@ -108,7 +108,8 @@ export function SearchOverlay({ onClose, onSelect }) {
   }
 
   return (
-    <div className="search-overlay">
+    <div className="search-overlay-container">
+      <div className="search-overlay">
       <div className="search-overlay__topbar">
         <button
           className="search-overlay__back-btn"
@@ -179,6 +180,8 @@ export function SearchOverlay({ onClose, onSelect }) {
           ))}
       </div>
     </div>
+    </div>
+    
   );
 }
 
@@ -251,7 +254,8 @@ export function QRScannerOverlay({ onClose, onScan }) {
   }, [scanning, onScan]);
 
   return (
-    <div className="qr-scanner-fullscreen-overlay">
+    <div className="qr-scanner-fullscreen-overlay-container">
+      <div className="qr-scanner-fullscreen-overlay">
       <div className="qr-modal">
         <div className="qr-modal__topnav">
           <button type="button" className="opd-detail__back-btn" onClick={onClose}>
@@ -285,5 +289,7 @@ export function QRScannerOverlay({ onClose, onScan }) {
         </div>
       </div>
     </div>
+    </div>
+    
   );
 }
