@@ -29,7 +29,7 @@
   border: none;
   border-width: 0;
   background-color: transparent;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 15px;
   color: #1a1a1a;
   outline: none;
@@ -70,5 +70,5 @@
   padding-left: 4px;
   font-size: 13px;
   color: #e53935;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
 }

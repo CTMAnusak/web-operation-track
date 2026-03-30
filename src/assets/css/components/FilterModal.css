@@ -42,7 +42,7 @@
 }
 
 .filter-modal__title {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 20px;
   font-weight: 800;
   color: #1a1a2e;
@@ -78,7 +78,7 @@
 
 /* ----- Section ----- */
 .filter-modal__section-label {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 700;
   color: #1a1a2e;
@@ -99,7 +99,7 @@
   border: 1.5px solid #e8eef6;
   background-color: #ffffff;
   padding: 0 44px 0 16px;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   color: #333;
   outline: none;
@@ -137,7 +137,7 @@
   border: 1.5px solid #e8eef6;
   background-color: #ffffff;
   padding: 0 44px 0 16px;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 600;
   color: #333;
@@ -212,7 +212,7 @@
 .filter-modal__branch-option {
   width: 100%;
   padding: 11px 15px;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 400;
   color: #7D8592;
@@ -273,7 +273,7 @@
 }
 
 .filter-modal__checkbox-label {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 600;
   color: #333;
@@ -288,7 +288,7 @@
   cursor: pointer;
   padding: 0;
   margin-top: 18px;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 700;
   color: #3478f6;
@@ -331,7 +331,7 @@
   border: 1.5px solid #e8eef6;
   background-color: #ffffff;
   padding: 0 16px 0 40px;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   color: #333;
   outline: none;
@@ -380,7 +380,7 @@
 .filter-modal__participant-option {
   width: 100%;
   padding: 11px 15px;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 400;
   color: #7D8592;
@@ -430,7 +430,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 700;
   color: #3478f6;
@@ -444,7 +444,7 @@
 }
 
 .filter-modal__participant-chip-name {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
   color: #333;
@@ -487,7 +487,7 @@
   border-radius: 14px;
   border: 2px solid #e0e6ef;
   background-color: #ffffff;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 15px;
   font-weight: 700;
   color: #555;
@@ -500,7 +500,7 @@
   border-radius: 14px;
   border: none;
   background-color: #3478f6;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 15px;
   font-weight: 700;
   color: #ffffff;

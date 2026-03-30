@@ -101,7 +101,7 @@
 }
 
 .dashboard__title {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 28px;
   font-weight: 800;
   color: #1a1a2e;
@@ -160,7 +160,7 @@
 }
 
 .dashboard__date-card-label {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 15px;
   font-weight: 600;
   color: #333;
@@ -202,7 +202,7 @@
 }
 
 .dashboard__summary-card-label {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
@@ -223,7 +223,7 @@
 }
 
 .dashboard__summary-card-value {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 22px;
   font-weight: 800;
   line-height: 1;
@@ -257,7 +257,7 @@
 
 .dashboard__header-search-pill-text {
   flex: 1;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 600;
   color: #1a1a2e;
@@ -331,7 +331,7 @@
 }
 
 .opd-card__hn-row {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
   color: #888;
@@ -339,7 +339,7 @@
 }
 
 .opd-card__name {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 15px;
   font-weight: 800;
   color: #1a1a2e;
@@ -347,7 +347,7 @@
 }
 
 .opd-card__sub {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
   color: #aaa;
@@ -363,7 +363,7 @@
 
 .opd-card__branch-label,
 .opd-card__doctor-label {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
   color: #888;
@@ -380,7 +380,7 @@
 }
 
 .opd-card__field-label {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 600;
   color: #aaa;
@@ -388,7 +388,7 @@
 }
 
 .opd-card__field-value {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 700;
   color: #1a1a2e;
@@ -411,7 +411,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 700;
   color: #5577aa;
@@ -430,14 +430,14 @@
 }
 
 .opd-card__duration-value {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 800;
   color: #3dba72;
 }
 
 .opd-card__procedures-value {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 800;
   color: #b86fe8;
@@ -449,7 +449,7 @@
   justify-content: center;
   padding: 7px 14px;
   border-radius: 100px;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 700;
 }
@@ -471,7 +471,7 @@
 
 /* ----- Section Title ----- */
 .dashboard__section-title {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 17px;
   font-weight: 800;
   color: #1a1a2e;
@@ -509,7 +509,7 @@
 }
 
 .dashboard__empty-text p {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 600;
   color: #666;
@@ -566,7 +566,7 @@
   border: none;
   background-color: #efefef;
   padding: 0 16px;
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 400;
   color: #1a1a2e;
@@ -620,7 +620,7 @@
 }
 
 .search-overlay__item-label {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 16px;
   font-weight: 700;
   color: #979797;
@@ -630,7 +630,7 @@
 }
 
 .search-overlay__item-sublabel {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 400;
   color: #b0b0b0;

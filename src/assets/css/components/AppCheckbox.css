@@ -33,7 +33,7 @@
 }
 
 .app-checkbox__label {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   color: #3a3a3a;
   font-weight: 400;

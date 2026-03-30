@@ -22,7 +22,7 @@
 }
 
 .login-page__logo-text {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 24px;
   font-weight: 700;
   color: #3478f6;
@@ -36,7 +36,7 @@
 }
 
 .login-page__title {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 18px;
   font-weight: 700;
   color: #1a1a1a;
