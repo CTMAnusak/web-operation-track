@@ -28,7 +28,7 @@
       "nickname": "บาส",
       "branchId": "b2",
       "roleId": "r1",
-      "avatarUrl": null
+      "avatarUrl": "/src/assets/images/avatar-men.png"
     },
     {
       "id": "u4",
@@ -98,7 +98,7 @@
       "nickname": "ญาญ่า",
       "branchId": "b2",
       "roleId": "r3",
-      "avatarUrl": null
+      "avatarUrl": "/src/assets/images/avatar-female-1.png"
     },
     {
       "id": "u11",
@@ -108,7 +108,7 @@
       "nickname": "คิมเบอร์ลี่",
       "branchId": "b1",
       "roleId": "r2",
-      "avatarUrl": null
+      "avatarUrl": "/src/assets/images/avatar-female-1.png"
     },
     {
       "id": "u12",
@@ -118,7 +118,7 @@
       "nickname": "แบรี่",
       "branchId": "b2",
       "roleId": "r3",
-      "avatarUrl": null
+      "avatarUrl": "/src/assets/images/avatar-men.png"
     },
     {
       "id": "u13",
@@ -128,7 +128,7 @@
       "nickname": "หมาก",
       "branchId": "b1",
       "roleId": "r2",
-      "avatarUrl": null
+      "avatarUrl": "/src/assets/images/avatar-men.png"
     },
     {
       "id": "u14",

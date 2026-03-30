@@ -3,6 +3,7 @@ import DatePickerScreen from './DatePickerScreen';
 import branches from '../mock/branches.json';
 import { formatThaiDateDmY } from '../config/thailandTime';
 import { getDoctorUsers, getParticipantUsers } from '../mock/dataHelpers';
+import { resolveAvatarUrl } from '../utils/avatarResolve';
 import '../assets/css/components/FilterModal.css';
 
 /* ---- Icons (Heroicons v2 outline) ---- */
@@ -72,16 +73,6 @@ const DOCTOR_SHOW_DEFAULT = 5;
 const BRANCHES_SORTED = branches
   .slice()
   .sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
-
-/** สร้าง initials จาก fullName (ตัวแรกของแต่ละคำ) */
-function getInitials(fullName) {
-  return fullName
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('');
-}
 
 function getDoctorDisplayName(doctor) {
   const baseName = doctor.nickname ?? doctor.fullName;
@@ -366,7 +357,7 @@ function FilterModal({ onClose, onConfirm, onClear, initialFilter }) {
                     return (
                       <div key={id} className="filter-modal__participant-chip">
                         <div className="filter-modal__participant-chip-avatar">
-                          {getInitials(u.fullName)}
+                          <img src={resolveAvatarUrl(u.avatarUrl)} alt="" />
                         </div>
                         <span className="filter-modal__participant-chip-name">{u.fullName}</span>
                         <button
