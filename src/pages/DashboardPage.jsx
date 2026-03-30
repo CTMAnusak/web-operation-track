@@ -95,6 +95,14 @@ function applyFilters(list, filterState) {
     result = result.filter((c) => filterState.doctorIds.includes(c.doctorId));
   }
 
+  if (filterState.participantIds && filterState.participantIds.length > 0) {
+    const wanted = new Set(filterState.participantIds);
+    result = result.filter((c) => {
+      const agg = getAggregatedParticipantIdsFromProcedures(c.procedures || []);
+      return agg.some((id) => wanted.has(id));
+    });
+  }
+
   return result;
 }
 

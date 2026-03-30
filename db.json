@@ -96,7 +96,7 @@
       "password": "123456",
       "fullName": "อุรัสยา เสปอร์บันด์",
       "nickname": "ญาญ่า",
-      "branchId": "b2",
+      "branchId": "b1",
       "roleId": "r3",
       "avatarUrl": "/src/assets/images/avatar-female-1.png"
     },
@@ -116,7 +116,7 @@
       "password": "123456",
       "fullName": "ณเดชน์ คูกิมิยะ",
       "nickname": "แบรี่",
-      "branchId": "b2",
+      "branchId": "b1",
       "roleId": "r3",
       "avatarUrl": "/src/assets/images/avatar-men.png"
     },
