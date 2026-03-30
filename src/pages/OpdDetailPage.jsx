@@ -27,6 +27,7 @@ import {
 } from '../mock/procedureEffectiveStatus';
 import dbData from '../../db.json';
 import logoImg from '../assets/images/logo-vtrack.png';
+import illustrationOpdEmpty from '../assets/images/illustration-opd-empty.png';
 import { resolveAvatarUrl } from '../utils/avatarResolve';
 import iconCatMachine from '../assets/icons/icon-cat-machine.png';
 import iconCatInject from '../assets/icons/icon-cat-inject.png';
@@ -65,7 +66,7 @@ const INJECT_POSITIONS_ALL = dbData.bodyPositions.filter(p =>
 
 /* Body zones/positions for laser procedures */
 const LASER_BODY_ZONES = dbData.bodyZones.filter(z =>
-  ['z1', 'z2', 'z3'].includes(z.id)
+  ['z1'].includes(z.id)
 );
 const LASER_BODY_POSITIONS = dbData.laserBodyPositions || [];
 
@@ -514,6 +515,116 @@ function MachineSettingsModal({ machineId, savedSettings, onClose, onSave }) {
   );
 }
 
+/** เฉพาะค่า P / F / Shot ต่อหนึ่งตำแหน่ง (ใช้บนการ์ดรายการ — ไม่มีชื่อตำแหน่ง) */
+function formatLaserSettingValuesOnly(s) {
+  const parts = [];
+  if (String(s.P ?? '').trim()) parts.push(`${String(s.P).trim()} P`);
+  if (String(s.F ?? '').trim()) parts.push(`${String(s.F).trim()} F`);
+  if (String(s.Shot ?? '').trim()) parts.push(`${String(s.Shot).trim()} Shot`);
+  return parts.length ? parts.join(' | ') : '';
+}
+
+/** ข้อความแสดงการตั้งค่า Laser ต่อหนึ่งตำแหน่ง (tag ใน popup — มีชื่อตำแหน่ง) */
+function formatLaserSettingDisplay(s) {
+  const line = formatLaserSettingValuesOnly(s);
+  if (!line) return '';
+  return `${s.positionName} ${line}`;
+}
+
+/* ─────────────────────────────────────────
+   Laser Settings Modal (P / F / Shot ต่อตำแหน่งที่เลือก)
+───────────────────────────────────────── */
+function LaserSettingsModal({ positions, savedRows, onClose, onSave }) {
+  const [rows, setRows] = useState(() =>
+    positions.map((p) => {
+      const existing = (savedRows || []).find((r) => r.positionId === p.id);
+      return {
+        positionId: p.id,
+        positionName: p.name,
+        P: existing?.P ?? '',
+        F: existing?.F ?? '',
+        Shot: existing?.Shot ?? '',
+      };
+    })
+  );
+
+  function updateRow(positionId, field, value) {
+    setRows((prev) =>
+      prev.map((r) => (r.positionId === positionId ? { ...r, [field]: value } : r))
+    );
+  }
+
+  const canSave =
+    rows.length > 0 &&
+    rows.some(
+      (r) =>
+        String(r.P ?? '').trim() ||
+        String(r.F ?? '').trim() ||
+        String(r.Shot ?? '').trim()
+    );
+
+  return (
+    <div className="inner-modal-overlay">
+      <div className="inner-modal inner-modal--laser-settings">
+        <div className="inner-modal__header">
+          <span className="inner-modal__step">ระบุการตั้งค่า</span>
+          <button type="button" className="inner-modal__close" onClick={onClose}><IconClose /></button>
+        </div>
+        <div className="inner-modal__body">
+          {rows.map((row) => (
+            <div key={row.positionId} className="laser-setting-group">
+              <div className="laser-setting-group__title">{row.positionName}</div>
+              <div className="laser-setting-group__fields">
+                <div className="laser-setting-field">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    className="laser-setting-field__input"
+                    placeholder="ระบุ"
+                    value={row.P}
+                    onChange={(e) => updateRow(row.positionId, 'P', e.target.value)}
+                  />
+                  <span className="laser-setting-field__unit">P</span>
+                </div>
+                <div className="laser-setting-field">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    className="laser-setting-field__input"
+                    placeholder="ระบุ"
+                    value={row.F}
+                    onChange={(e) => updateRow(row.positionId, 'F', e.target.value)}
+                  />
+                  <span className="laser-setting-field__unit">F</span>
+                </div>
+                <div className="laser-setting-field">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    className="laser-setting-field__input"
+                    placeholder="ระบุ"
+                    value={row.Shot}
+                    onChange={(e) => updateRow(row.positionId, 'Shot', e.target.value)}
+                  />
+                  <span className="laser-setting-field__unit">Shot</span>
+                </div>
+              </div>
+            </div>
+          ))}
+          {rows.length === 0 && (
+            <p style={{ textAlign: 'center', color: '#888', margin: '12px 0', fontSize: 14 }}>
+              กรุณาเลือกตำแหน่งร่างกายก่อน
+            </p>
+          )}
+        </div>
+        <button type="button" className="btn-primary" onClick={() => onSave(rows)} disabled={!canSave}>
+          บันทึก
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────
    Target Weight Modal (Wellness - Slim Pen)
 ───────────────────────────────────────── */
@@ -780,8 +891,19 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
       : {}
   );
 
+  /* laser settings (P / F / Shot ต่อตำแหน่ง) */
+  const [showLaserSettings, setShowLaserSettings] = useState(false);
+  const [laserSettings, setLaserSettings] = useState(
+    Array.isArray(proc.laserSettings) ? proc.laserSettings : []
+  );
+
   /* QR scanner */
   const [showQR, setShowQR] = useState(false);
+
+  useEffect(() => {
+    if (!isLaser) return;
+    setLaserSettings((prev) => prev.filter((s) => selectedPositions.includes(s.positionId)));
+  }, [isLaser, selectedPositions]);
 
   const visibleParticipants = showViewMore ? participants : participants.slice(0, 2);
   const machineId = proc.machineId;
@@ -837,9 +959,24 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
       return pos?.zoneId === zoneId;
     });
   });
-  const hasSettings = isInject || isWellness || isLaser
+  const laserSettingsFilled =
+    !isLaser ||
+    (selectedPositions.length > 0 &&
+      laserSettings.some(
+        (s) =>
+          selectedPositions.includes(s.positionId) &&
+          (String(s.P ?? '').trim() ||
+            String(s.F ?? '').trim() ||
+            String(s.Shot ?? '').trim())
+      ));
+
+  const hasSettings = isInject
     ? true
-    : Object.values(settings).some((v) => String(v).trim() !== '');
+    : isWellness
+      ? true
+      : isLaser
+        ? laserSettingsFilled
+        : Object.values(settings).some((v) => String(v).trim() !== '');
   const hasParticipants = participants.length > 0;
 
   const hasWaist = String(waist).trim() !== '';
@@ -889,7 +1026,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
       selectedZones: isWellness ? [] : selectedZones,
       selectedPositions: isWellness ? [] : selectedPositions,
       settings: isInject || isWellness || isLaser ? {} : settings,
-      laserSettings: [],
+      ...(isLaser ? { laserSettings } : {}),
       ...(isSlimPen && { waist, startWeight, weight, muscle, fat, targetWeight, targetDurationMonths }),
       ...(isIVDrip && { ivFormula, ivSubFormula, ivVolume, ivFlowRate }),
       status: nextStatus,
@@ -957,6 +1094,17 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
           savedSettings={settings}
           onClose={() => setShowSettings(false)}
           onSave={(vals) => { setSettings(vals); setShowSettings(false); }}
+        />
+      )}
+      {showLaserSettings && isLaser && (
+        <LaserSettingsModal
+          positions={availablePositions.filter((p) => selectedPositions.includes(p.id))}
+          savedRows={laserSettings}
+          onClose={() => setShowLaserSettings(false)}
+          onSave={(rows) => {
+            setLaserSettings(rows);
+            setShowLaserSettings(false);
+          }}
         />
       )}
       {showTargetWeightModal && isSlimPen && (
@@ -1265,6 +1413,44 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
                     )}
                   </span>
                 ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Settings — laser (P / F / Shot ต่อตำแหน่ง) */}
+        {isLaser && (
+          <>
+            <div className="proc-popup__field-label" style={{ marginTop: 14 }}>การตั้งค่า</div>
+            <button
+              type="button"
+              className={`proc-popup__select-btn ${showSettingsError ? 'proc-popup__select-btn--error' : ''}`}
+              onClick={() => !readOnly && setShowLaserSettings(true)}
+              disabled={readOnly || selectedPositions.length === 0}
+            >
+              <span>ระบุการตั้งค่า</span>
+              <IconChevronRight />
+            </button>
+            {laserSettings.some((s) => formatLaserSettingDisplay(s)) && (
+              <div className="proc-popup__tags">
+                {laserSettings.map((s) => {
+                  const laserTagLabel = formatLaserSettingDisplay(s);
+                  if (!laserTagLabel) return null;
+                  return (
+                    <span key={s.positionId} className="proc-popup__tag">
+                      {laserTagLabel}
+                      {!readOnly && (
+                        <button
+                          type="button"
+                          className="proc-popup__tag-remove"
+                          onClick={() =>
+                            setLaserSettings((prev) => prev.filter((x) => x.positionId !== s.positionId))
+                          }
+                        >×</button>
+                      )}
+                    </span>
+                  );
+                })}
               </div>
             )}
           </>
@@ -1664,8 +1850,8 @@ function getLaserProcName(proc) {
 function getSettingLabel(proc) {
   if (proc.categoryId === 'cat4' && proc.laserSettings && proc.laserSettings.length > 0) {
     return proc.laserSettings
-      .filter(s => s.P || s.F || s.Shot)
-      .map(s => `${s.positionName} ${s.P ? s.P + ' P' : ''}${s.F ? ' | ' + s.F + ' F' : ''}${s.Shot ? ' | ' + s.Shot + ' Shot' : ''}`.trim())
+      .map((s) => formatLaserSettingValuesOnly(s))
+      .filter(Boolean)
       .join(', ');
   }
   if (proc.settings && typeof proc.settings === 'object' && !Array.isArray(proc.settings)) {
@@ -1793,7 +1979,16 @@ function ProcedureCard({ proc, onDelete, onClick, canDeleteCard }) {
               {settingLabel && (
                 <>
                   <div className="proc-card__field-label" style={{ marginTop: 8 }}>การตั้งค่า</div>
-                  <div className="proc-card__field-value proc-card__field-value--small">{settingLabel}</div>
+                  <div
+                    className={
+                      proc.categoryId === 'cat4'
+                        ? 'proc-card__field-value proc-card__field-value--small proc-card__field-value--laser-settings'
+                        : 'proc-card__field-value proc-card__field-value--small'
+                    }
+                    title={proc.categoryId === 'cat4' ? settingLabel : undefined}
+                  >
+                    {settingLabel}
+                  </div>
                 </>
               )}
             </>
@@ -2208,27 +2403,40 @@ function OpdDetailPage() {
           <h2 className="opd-detail__section-title">รายการหัตถการ</h2>
 
           <div className="opd-detail__proc-list">
-            {[...procedures]
-              .sort((a, b) => {
-                const statusOrder = { 'รอดำเนินการ': 0, 'กำลังทำ': 1, 'เสร็จสิ้น': 2 };
-                const sDiff = (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0);
-                if (sDiff !== 0) return sDiff;
-                const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                return bCreated - aCreated;
-              })
-              .map((proc) => {
-                const canDeleteCard = canDeleteProcCard(proc, currentUserRoleId);
-                return (
-                  <ProcedureCard
-                    key={proc.id}
-                    proc={proc}
-                    onDelete={handleDeleteProc}
-                    onClick={handleOpenProc}
-                    canDeleteCard={canDeleteCard}
+            {procedures.length === 0 ? (
+              <div className="opd-detail__proc-empty-card">
+                <div className="opd-detail__empty-state opd-detail__empty-state--proc-list">
+                  <img
+                    src={illustrationOpdEmpty}
+                    alt="ยังไม่มีรายการหัตถการ"
                   />
-                );
-              })}
+                  <p className="opd-detail__empty-state-title">ยังไม่มีรายการหัตถการ</p>
+                  <p className="opd-detail__empty-state-desc">กรุณาเพิ่มหัตถการในระบบ</p>
+                </div>
+              </div>
+            ) : (
+              [...procedures]
+                .sort((a, b) => {
+                  const statusOrder = { 'รอดำเนินการ': 0, 'กำลังทำ': 1, 'เสร็จสิ้น': 2 };
+                  const sDiff = (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0);
+                  if (sDiff !== 0) return sDiff;
+                  const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                  const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                  return bCreated - aCreated;
+                })
+                .map((proc) => {
+                  const canDeleteCard = canDeleteProcCard(proc, currentUserRoleId);
+                  return (
+                    <ProcedureCard
+                      key={proc.id}
+                      proc={proc}
+                      onDelete={handleDeleteProc}
+                      onClick={handleOpenProc}
+                      canDeleteCard={canDeleteCard}
+                    />
+                  );
+                })
+            )}
           </div>
         </main>
 

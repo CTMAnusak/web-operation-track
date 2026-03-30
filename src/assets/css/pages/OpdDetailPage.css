@@ -250,6 +250,13 @@
   gap: 14px;
 }
 
+.opd-detail__proc-empty-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 28px 20px 36px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
 /* =========================================
    Procedure Card
    ========================================= */
@@ -362,6 +369,15 @@
   font-size: 12px;
   color: #555;
   font-weight: 600;
+}
+
+/* สรุปการตั้งค่า Laser บนการ์ด — บรรทัดเดียว + … เมื่อยาว */
+.proc-card__field-value--laser-settings {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: normal;
+  max-width: 100%;
 }
 
 .proc-card__participants {
@@ -1638,10 +1654,40 @@
   gap: 16px;
 }
 
+.opd-detail__empty-state--proc-list {
+  padding: 8px 12px 4px;
+  gap: 14px;
+}
+
+.opd-detail__empty-state--proc-list img {
+  width: 200px;
+}
+
 .opd-detail__empty-state img {
   width: 180px;
   height: auto;
+  max-width: 100%;
   object-fit: contain;
+}
+
+.opd-detail__empty-state-title {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 800;
+  color: #1a1a2e;
+  text-align: center;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.opd-detail__empty-state-desc {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
 }
 
 .opd-detail__empty-state-text {

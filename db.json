@@ -248,20 +248,12 @@
     { "id": "lbz1", "zoneId": "z1", "laserTypeId": "l1" },
     { "id": "lbz2", "zoneId": "z1", "laserTypeId": "l2" },
     { "id": "lbz3", "zoneId": "z1", "laserTypeId": "l3" },
-    { "id": "lbz4", "zoneId": "z1", "laserTypeId": "l4" },
-    { "id": "lbz5", "zoneId": "z2", "laserTypeId": "l1" },
-    { "id": "lbz6", "zoneId": "z2", "laserTypeId": "l2" },
-    { "id": "lbz7", "zoneId": "z3", "laserTypeId": "l1" },
-    { "id": "lbz8", "zoneId": "z3", "laserTypeId": "l2" },
-    { "id": "lbz9", "zoneId": "z3", "laserTypeId": "l3" }
+    { "id": "lbz4", "zoneId": "z1", "laserTypeId": "l4" }
   ],
   "laserBodyPositions": [
     { "id": "lbp1", "zoneId": "z1", "name": "กรอบหน้าส่วนล่าง" },
     { "id": "lbp2", "zoneId": "z1", "name": "คอ" },
-    { "id": "lbp3", "zoneId": "z1", "name": "เหนียง" },
-    { "id": "lbp4", "zoneId": "z2", "name": "ต้นขาด้านนอก" },
-    { "id": "lbp5", "zoneId": "z2", "name": "ต้นขาด้านใน" },
-    { "id": "lbp6", "zoneId": "z2", "name": "ต้นขาทั้งหมด" }
+    { "id": "lbp3", "zoneId": "z1", "name": "เหนียง" }
   ],
   "laserSettingKeys": [
     { "id": "lk1", "key": "P", "unit": "mJ" },
