@@ -516,31 +516,31 @@
   margin: 0;
   line-height: 1.6;
 }
-
-/* =========================================
-   Search Overlay (fixed, full-screen)
-   ========================================= */
+/* Search and Scanner Overlay */
 .search-overlay-container, .qr-scanner-fullscreen-overlay-container {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 199;
 }
-.search-overlay {
+.search-overlay, .qr-scanner-fullscreen-overlay {
   position: fixed;
   max-width: 342px;
   width: 100%;
+  width: 342px;
+  height: calc(100% - 48px);
   inset: 0;
   background-color: #F4F9FD;
+  z-index: 300;
   display: flex;
   flex-direction: column;
-  z-index: 200;
-  padding: 12px 16px;
-  border-radius: 24px;
-  height: calc(100% - 48px);
   margin: auto;
+  border-radius: 24px;
 }
-
+.search-overlay, .qr-scanner-fullscreen-overlay .qr-modal {
+  padding: 12px 16px;
+}
+/* Search */
 .search-overlay__topbar {
   display: flex;
   align-items: center;
@@ -661,24 +661,10 @@
 /* =========================================
    QR Scanner Fullscreen Overlay
    ========================================= */
-.qr-scanner-fullscreen-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: #F4F9FD;
-  z-index: 300;
-  display: flex;
-  flex-direction: column;
-  width: 342px;
-  height: calc(100% - 48px);
-  margin: auto;
-  border-radius: 24px;
-}
 
 .qr-scanner-fullscreen-overlay .qr-modal {
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
-  padding: 12px 16px;
   height: 100%;
-  
 }
