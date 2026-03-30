@@ -1,4 +1,5 @@
 import '../assets/css/components/ProfileModal.css';
+import { resolveAvatarUrl } from '../utils/avatarResolve';
 
 function IconLogout() {
   return (
@@ -18,16 +19,8 @@ function IconClose() {
   );
 }
 
-function IconUserDefault() {
-  return (
-    <svg width="80" height="80" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-    </svg>
-  );
-}
-
 function ProfileModal({ user, avatarUrl, onClose, onLogout }) {
+  const avatarSrc = resolveAvatarUrl(avatarUrl);
   return (
     <>
       <div className="profile-modal-overlay" onClick={onClose} />
@@ -39,12 +32,8 @@ function ProfileModal({ user, avatarUrl, onClose, onLogout }) {
         <h2 className="profile-modal__title">Profile</h2>
         
         <div className="profile-modal__content">
-          <div className={`profile-modal__avatar${!avatarUrl ? ' profile-modal__avatar--no-image' : ''}`}>
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={user?.fullName || 'โปรไฟล์'} />
-            ) : (
-              <IconUserDefault />
-            )}
+          <div className="profile-modal__avatar">
+            <img src={avatarSrc} alt={user?.fullName || 'โปรไฟล์'} />
           </div>
           
           <div className="profile-modal__user-info">

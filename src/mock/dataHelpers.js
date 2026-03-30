@@ -51,6 +51,26 @@ export function getUsersByIds(ids = []) {
 }
 
 /**
+ * รวม id ผู้ร่วมทำจากทุกหัตถการ (ไม่ซ้ำ เรียงตามลำดับที่พบในรายการ)
+ * ใช้ทั้ง participantIds และ participants ที่บันทึกไว้ในหัตถการ
+ */
+export function getAggregatedParticipantIdsFromProcedures(procedures = []) {
+  const seen = new Set();
+  const ordered = [];
+  for (const proc of procedures) {
+    const fromIds = proc.participantIds || [];
+    const fromParticipants = (proc.participants || []).map((u) => u?.id).filter(Boolean);
+    for (const id of [...fromIds, ...fromParticipants]) {
+      if (id && !seen.has(id)) {
+        seen.add(id);
+        ordered.push(id);
+      }
+    }
+  }
+  return ordered;
+}
+
+/**
  * คำนวณเวลารวม (นาที) จาก procedures array
  * นับเฉพาะ procedure สถานะเสร็จสิ้น โดยใช้ createdAt เป็นเวลาเริ่ม และ endDate หรือ endTime เป็นเวลาจบ
  */

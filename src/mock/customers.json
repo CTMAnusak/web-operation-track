@@ -9,7 +9,6 @@
     "createdTime": "10:15",
     "appointmentDate": "27/03/2026",
     "appointmentTime": "11:30",
-    "collaboratorIds": ["u2", "u10"],
     "procedures": [
       {
         "id": "p1",
@@ -22,7 +21,7 @@
         "participants": [],
         "endTime": null,
         "status": "กำลังทำ",
-        "createdAt": "2026-03-27T10:15:00+07:00"
+        "createdAt": "2026-03-27T11:30:00+07:00"
       },
       {
         "id": "p2",
@@ -94,7 +93,6 @@
     "createdTime": "13:15",
     "appointmentDate": "04/03/2026",
     "appointmentTime": "13:00",
-    "collaboratorIds": ["u8"],
     "procedures": [
       {
         "id": "p7",

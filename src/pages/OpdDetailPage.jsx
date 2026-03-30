@@ -3,7 +3,14 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { SearchOverlay, QRScannerOverlay, saveHistory } from '../components/SearchQrOverlays';
 import DashboardHeader from '../components/DashboardHeader';
 import MobileLayout from '../layouts/MobileLayout';
-import { getBranchName, getDoctorNickname, getUsersByIds, getRoleName, getBranchFullName } from '../mock/dataHelpers';
+import {
+  getBranchName,
+  getDoctorNickname,
+  getUsersByIds,
+  getRoleName,
+  getBranchFullName,
+  getAggregatedParticipantIdsFromProcedures,
+} from '../mock/dataHelpers';
 import { getCurrentDateTime } from '../config/mockDateTime';
 import {
   formatClockThailand,
@@ -20,7 +27,7 @@ import {
 } from '../mock/procedureEffectiveStatus';
 import dbData from '../../db.json';
 import logoImg from '../assets/images/logo-vtrack.png';
-import avatarImg from '../assets/images/avatar-user.png';
+import { resolveAvatarUrl } from '../utils/avatarResolve';
 import iconCatMachine from '../assets/icons/icon-cat-machine.png';
 import iconCatInject from '../assets/icons/icon-cat-inject.png';
 import iconCatWellness from '../assets/icons/icon-cat-wellness.png';
@@ -76,6 +83,7 @@ const ALL_USERS = dbData.users.map(u => ({
   username: u.username,
   fullName: u.fullName,
   nickname: u.nickname,
+  avatarUrl: u.avatarUrl,
   role: (() => {
     if (u.roleId === 'r1') return 'แพทย์';
     if (u.roleId === 'r2') return 'พยาบาล';
@@ -1296,7 +1304,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
           <div className="proc-popup__participant-list">
             {visibleParticipants.map(u => (
               <div key={u.id} className="participant-item">
-                <img src={avatarImg} alt={u.nickname} className="participant-item__avatar" />
+                <img src={resolveAvatarUrl(u.avatarUrl)} alt={u.nickname} className="participant-item__avatar" />
                 <div className="participant-item__info">
                   <div className="participant-item__name">{u.fullName} ({u.nickname})</div>
                   <div className="participant-item__role">{u.role}</div>
@@ -1801,7 +1809,7 @@ function ProcedureCard({ proc, onDelete, onClick, canDeleteCard }) {
           <div className="proc-card__participants">
             {participants.map((u) => (
               <div key={u.id} className="proc-card__participant-avatar" title={u.fullName}>
-                <img src={avatarImg} alt={u.nickname} />
+                <img src={resolveAvatarUrl(u.avatarUrl)} alt={u.nickname} />
               </div>
             ))}
             {participants.length === 0 && (
@@ -2125,12 +2133,16 @@ function OpdDetailPage() {
     );
   }
 
+  const summaryCollaborators = getUsersByIds(
+    getAggregatedParticipantIdsFromProcedures(procedures)
+  );
+
   return (
     <MobileLayout>
       <div className="opd-detail">
         <DashboardHeader
           logoSrc={logoImg}
-          avatarSrc={currentUser?.avatarUrl || avatarImg}
+          avatarSrc={resolveAvatarUrl(currentUser?.avatarUrl)}
           selectedCustomer={headerSelectedCustomer}
           onSearchClick={handleSearchClick}
           onQRClick={handleQRClick}
@@ -2182,11 +2194,15 @@ function OpdDetailPage() {
               <div>
                 <div className="opd-detail__field-label">ผู้ร่วมทำ</div>
                 <div className="opd-detail__field-avatars">
-                  {getUsersByIds(customer.collaboratorIds || []).map((u) => (
-                    <div key={u.id} className="opd-detail__participant-avatar" title={u.fullName}>
-                      <img src={avatarImg} alt={u.nickname} />
-                    </div>
-                  ))}
+                  {summaryCollaborators.length > 0 ? (
+                    summaryCollaborators.map((u) => (
+                      <div key={u.id} className="opd-detail__participant-avatar" title={u.fullName}>
+                        <img src={resolveAvatarUrl(u.avatarUrl)} alt={u.nickname} />
+                      </div>
+                    ))
+                  ) : (
+                    <span className="opd-detail__field-value">-</span>
+                  )}
                 </div>
               </div>
             </div>

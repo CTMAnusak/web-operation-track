@@ -7,10 +7,18 @@ import ProfileModal from '../components/ProfileModal';
 import DashboardHeader from '../components/DashboardHeader';
 import { SearchOverlay, QRScannerOverlay, saveHistory } from '../components/SearchQrOverlays';
 import logoImg from '../assets/images/logo-vtrack.png';
-import avatarImg from '../assets/images/avatar-user.png';
+import { resolveAvatarUrl } from '../utils/avatarResolve';
 import illustrationImg from '../assets/images/illustration-opd-empty.png';
 import customers from '../mock/customers.json';
-import { getBranchName, getDoctorNickname, getUsersByIds, calcTotalDuration, getRoleName, getBranchFullName } from '../mock/dataHelpers';
+import {
+  getBranchName,
+  getDoctorNickname,
+  getUsersByIds,
+  calcTotalDuration,
+  getRoleName,
+  getBranchFullName,
+  getAggregatedParticipantIdsFromProcedures,
+} from '../mock/dataHelpers';
 import { deriveCustomerDisplayStatus, getEffectiveProceduresForMetrics } from '../mock/procedureEffectiveStatus';
 import { getCurrentDate } from '../config/mockDateTime';
 import {
@@ -167,7 +175,8 @@ function OpdEmptyState({ illustrationSrc }) {
 function OpdCard({ customer, onClick }) {
   const displayStatus = deriveCustomerDisplayStatus(customer);
   const modifier = statusBadgeModifier(displayStatus);
-  const collaborators = getUsersByIds(customer.collaboratorIds || []);
+  const collaboratorIds = getAggregatedParticipantIdsFromProcedures(customer.procedures || []);
+  const collaborators = getUsersByIds(collaboratorIds);
   const { hours, minutes, hasAny } = calcTotalDuration(getEffectiveProceduresForMetrics(customer));
 
   const durationLabel = hasAny && (hours > 0 || minutes > 0)
@@ -208,7 +217,7 @@ function OpdCard({ customer, onClick }) {
             {collaborators.length > 0 ? (
               collaborators.map((u) => (
                 <div key={u.id} className="opd-card__participant-avatar" title={u.fullName}>
-                  {u.nickname.charAt(0).toUpperCase()}
+                  <img src={resolveAvatarUrl(u.avatarUrl)} alt={u.nickname} />
                 </div>
               ))
             ) : (
@@ -369,7 +378,7 @@ function DashboardPage() {
       <div className="dashboard">
         <DashboardHeader
           logoSrc={logoImg}
-          avatarSrc={user.avatarUrl || avatarImg}
+          avatarSrc={resolveAvatarUrl(user.avatarUrl)}
           selectedCustomer={selectedCustomer}
           onSearchClick={handleSearchClick}
           onQRClick={handleQRClick}
