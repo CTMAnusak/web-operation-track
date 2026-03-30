@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { SearchOverlay, QRScannerOverlay, saveHistory } from '../components/SearchQrOverlays';
+import DashboardHeader from '../components/DashboardHeader';
 import MobileLayout from '../layouts/MobileLayout';
 import { getBranchName, getDoctorNickname, getUsersByIds, getRoleName, getBranchFullName } from '../mock/dataHelpers';
 import { getCurrentDateTime } from '../config/mockDateTime';
@@ -12,7 +14,10 @@ import {
 } from '../config/thailandTime';
 import ProfileModal from '../components/ProfileModal';
 import customers from '../mock/customers.json';
-import { applyAutoCompleteToProcedure } from '../mock/procedureEffectiveStatus';
+import {
+  applyAutoCompleteToProcedure,
+  normalizeProceduresFromCustomer,
+} from '../mock/procedureEffectiveStatus';
 import dbData from '../../db.json';
 import logoImg from '../assets/images/logo-vtrack.png';
 import avatarImg from '../assets/images/avatar-user.png';
@@ -21,6 +26,7 @@ import iconCatInject from '../assets/icons/icon-cat-inject.png';
 import iconCatWellness from '../assets/icons/icon-cat-wellness.png';
 import iconCatLaser from '../assets/icons/icon-cat-laser.png';
 import '../assets/css/pages/OpdDetailPage.css';
+import '../assets/css/pages/dashboard.css';
 
 /* ─────────────────────────────────────────
    Data from db.json
@@ -135,24 +141,6 @@ function IconPlus() {
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 4.5v15m7.5-7.5h-15" />
-    </svg>
-  );
-}
-
-function IconSearch() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-    </svg>
-  );
-}
-
-function IconQR() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5ZM6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
     </svg>
   );
 }
@@ -274,15 +262,30 @@ function QRScannerModal({ onClose, onScan }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
 
+  function releaseCamera() {
+    const stream = streamRef.current;
+    streamRef.current = null;
+    const el = videoRef.current;
+    if (el) {
+      el.srcObject = null;
+    }
+    if (stream) {
+      stream.getTracks().forEach((t) => t.stop());
+    }
+  }
+
   useEffect(() => {
-    let mounted = true;
+    let cancelled = false;
     async function initCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: 'environment' } },
           audio: false,
         });
-        if (!mounted) return;
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
         streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -290,18 +293,21 @@ function QRScannerModal({ onClose, onScan }) {
         }
         setCameraReady(true);
       } catch (err) {
-        setCameraError('ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการใช้งานกล้อง');
+        if (!cancelled) setCameraError('ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการใช้งานกล้อง');
       }
     }
     initCamera();
     return () => {
-      mounted = false;
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-        streamRef.current = null;
-      }
+      cancelled = true;
+      releaseCamera();
     };
   }, []);
+
+  useEffect(() => {
+    if (!scanning) {
+      releaseCamera();
+    }
+  }, [scanning]);
 
   useEffect(() => {
     if (!cameraReady || !scanning) return;
@@ -1841,9 +1847,9 @@ function OpdDetailPage() {
   })();
   const currentUserRoleId = currentUser?.roleId || null;
 
-  /* procedure list state */
-  const [procedures, setProcedures] = useState(
-    (customer?.procedures || []).map(p => ({ ...p, status: p.status || 'รอดำเนินการ' }))
+  /* procedure list state — ใช้ normalize ทันที ไม่ให้ JSON ดิบทับหลัง auto-complete ในรอบแรก */
+  const [procedures, setProcedures] = useState(() =>
+    normalizeProceduresFromCustomer(customer)
   );
 
   /* UI state */
@@ -1855,6 +1861,10 @@ function OpdDetailPage() {
   const [selectedCat, setSelectedCat] = useState(null);
   const [activeProcId, setActiveProcId] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [qrOpen, setQROpen] = useState(false);
+  const [headerSelectedCustomer, setHeaderSelectedCustomer] = useState(null);
+  const prevSyncedHnRef = useRef(customer?.hn);
 
   const activeProcData = procedures.find(p => p.id === activeProcId);
 
@@ -1874,8 +1884,58 @@ function OpdDetailPage() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    if (customer) setHeaderSelectedCustomer(customer);
+  }, [customer?.hn]);
+
+  /* สลับคนไข้ (ค้นหา/สแกน) เมื่อ hn เปลี่ยนจริง — โหลดจาก JSON + auto เสร็จทันที (ไม่ซ้ำกับ useState ตอน mount) */
+  useEffect(() => {
+    if (!customer?.hn) return;
+    if (prevSyncedHnRef.current === customer.hn) return;
+    prevSyncedHnRef.current = customer.hn;
+    setProcedures(normalizeProceduresFromCustomer(customer));
+    setActiveProcId(null);
+  }, [customer?.hn]);
+
   function handleBack() {
     navigate('/dashboard', { state: returnState ? { returnState } : undefined });
+  }
+
+  function handleSearchClick() {
+    setSearchOpen(true);
+  }
+
+  function handleSearchSelect(selectedCustomer) {
+    setSearchOpen(false);
+    setHeaderSelectedCustomer(selectedCustomer);
+    if (selectedCustomer.hn !== customer.hn) {
+      navigate(`/opd/${selectedCustomer.hn}`, {
+        state: { customer: selectedCustomer, returnState },
+      });
+    }
+  }
+
+  function handleClearHeaderSearch() {
+    setHeaderSelectedCustomer(null);
+  }
+
+  function handleQRClick() {
+    setQROpen(true);
+  }
+
+  function handleQRClose() {
+    setQROpen(false);
+  }
+
+  function handleQRScan(scannedCustomer) {
+    saveHistory(scannedCustomer.hn);
+    setQROpen(false);
+    setHeaderSelectedCustomer(scannedCustomer);
+    if (scannedCustomer.hn !== customer.hn) {
+      navigate(`/opd/${scannedCustomer.hn}`, {
+        state: { customer: scannedCustomer, returnState },
+      });
+    }
   }
 
   function handleAvatarClick() {
@@ -2068,31 +2128,15 @@ function OpdDetailPage() {
   return (
     <MobileLayout>
       <div className="opd-detail">
-        {/* Top App Bar */}
-        <header className="opd-detail__topbar">
-          <div className="opd-detail__topbar-logo">
-            <img src={logoImg} alt="V Track" className="opd-detail__topbar-logo-img" />
-          </div>
-          <div className="opd-detail__topbar-actions">
-            <button className="opd-detail__topbar-icon-btn" aria-label="ค้นหา">
-              <IconSearch />
-            </button>
-            <button className="opd-detail__topbar-icon-btn" aria-label="QR Code">
-              <IconQR />
-            </button>
-            <button 
-              className={`opd-detail__topbar-avatar${!currentUser?.avatarUrl ? ' opd-detail__topbar-avatar--no-image' : ''}`}
-              onClick={handleAvatarClick}
-              aria-label="โปรไฟล์"
-            >
-              {currentUser?.avatarUrl ? (
-                <img src={currentUser.avatarUrl} alt="โปรไฟล์ผู้ใช้" />
-              ) : (
-                <IconUserSmall />
-              )}
-            </button>
-          </div>
-        </header>
+        <DashboardHeader
+          logoSrc={logoImg}
+          avatarSrc={currentUser?.avatarUrl || avatarImg}
+          selectedCustomer={headerSelectedCustomer}
+          onSearchClick={handleSearchClick}
+          onQRClick={handleQRClick}
+          onClearSearch={handleClearHeaderSearch}
+          onAvatarClick={handleAvatarClick}
+        />
 
         {/* Back Button */}
         <div className="opd-detail__nav">
@@ -2223,6 +2267,17 @@ function OpdDetailPage() {
             onClose={() => setShowLaserSheet(false)}
             onAdd={handleAddLaser}
           />
+        )}
+
+        {searchOpen && (
+          <SearchOverlay
+            onClose={() => setSearchOpen(false)}
+            onSelect={handleSearchSelect}
+          />
+        )}
+
+        {qrOpen && (
+          <QRScannerOverlay onClose={handleQRClose} onScan={handleQRScan} />
         )}
 
         {/* Profile Modal */}

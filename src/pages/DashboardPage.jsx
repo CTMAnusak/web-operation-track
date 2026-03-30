@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MobileLayout from '../layouts/MobileLayout';
 import { routePaths } from '../routes/routePaths';
 import FilterModal from '../components/FilterModal';
 import ProfileModal from '../components/ProfileModal';
+import DashboardHeader from '../components/DashboardHeader';
+import { SearchOverlay, QRScannerOverlay, saveHistory } from '../components/SearchQrOverlays';
 import logoImg from '../assets/images/logo-vtrack.png';
 import avatarImg from '../assets/images/avatar-user.png';
 import illustrationImg from '../assets/images/illustration-opd-empty.png';
@@ -21,24 +23,6 @@ import '../assets/css/pages/dashboard.css';
 import '../assets/css/pages/OpdDetailPage.css';
 
 /* ---- Icons (Heroicons v2 outline) ---- */
-function IconSearch() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-    </svg>
-  );
-}
-
-function IconQR() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5ZM6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
-    </svg>
-  );
-}
-
 function IconCalendar() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
@@ -57,279 +41,12 @@ function IconFilter() {
   );
 }
 
-function IconClose() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 18 18 6M6 6l12 12" />
-    </svg>
-  );
-}
-
 function IconUser() {
   return (
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
     </svg>
-  );
-}
-
-function IconUserSmall() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-    </svg>
-  );
-}
-
-function IconBack() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-    </svg>
-  );
-}
-
-function IconClock() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-    </svg>
-  );
-}
-
-function IconArrowUpLeft() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m9 9 6.196 6.196M15 9H9v6" />
-    </svg>
-  );
-}
-
-/* ---- Search history helpers ---- */
-const HISTORY_KEY = 'searchHistory';
-
-function getHistory() {
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
-  } catch {
-    return [];
-  }
-}
-
-function saveHistory(hn) {
-  const prev = getHistory().filter((h) => h !== hn);
-  const next = [hn, ...prev].slice(0, 10);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
-}
-
-function removeHistory(hn) {
-  const next = getHistory().filter((h) => h !== hn);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
-}
-
-/* ---- SearchOverlay ---- */
-function SearchOverlay({ onClose, onSelect }) {
-  const inputRef = useRef(null);
-  const [query, setQuery] = useState('');
-  const [history, setHistory] = useState(getHistory);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const q = query.trim().toLowerCase();
-  const results = q
-    ? customers.filter((c) =>
-        c.hn.toLowerCase().includes(q) ||
-        c.name.toLowerCase().includes(q)
-      )
-    : [];
-
-  const isTyping = query.trim().length > 0;
-
-  function handleSelectResult(customer) {
-    saveHistory(customer.hn);
-    onSelect(customer);
-  }
-
-  function handleFillFromHistory(hn) {
-    const found = customers.find((c) => c.hn === hn);
-    if (found) {
-      handleSelectResult(found);
-    } else {
-      setQuery(hn);
-      inputRef.current?.focus();
-    }
-  }
-
-  function handleRemoveHistory(e, hn) {
-    e.stopPropagation();
-    removeHistory(hn);
-    setHistory(getHistory());
-  }
-
-  return (
-    <div className="search-overlay">
-      <div className="search-overlay__topbar">
-        <button
-          className="search-overlay__back-btn"
-          aria-label="ย้อนกลับ"
-          onClick={onClose}
-        >
-          <IconBack />
-        </button>
-        <div className="search-overlay__input-wrap">
-          <input
-            ref={inputRef}
-            className="search-overlay__input"
-            type="text"
-            placeholder="ค้นหาข้อมูลลูกค้า ใน V Track"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="search-overlay__list">
-        {!isTyping &&
-          history.map((hn) => {
-            const histCustomer = customers.find((c) => c.hn === hn);
-            return (
-              <button
-                key={hn}
-                className="search-overlay__item"
-                onClick={() => handleFillFromHistory(hn)}
-              >
-                <span className="search-overlay__item-icon"><IconClock /></span>
-                {histCustomer ? (
-                  <span className="search-overlay__item-label-wrap">
-                    <span className="search-overlay__item-label">{histCustomer.name}</span>
-                    <span className="search-overlay__item-sublabel">HN {hn}</span>
-                  </span>
-                ) : (
-                  <span className="search-overlay__item-label">{hn}</span>
-                )}
-                <span
-                  className="search-overlay__item-action"
-                  role="button"
-                  tabIndex={0}
-                  aria-label="ลบประวัติ"
-                  onClick={(e) => handleRemoveHistory(e, hn)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleRemoveHistory(e, hn); }}
-                >
-                  <IconClose />
-                </span>
-              </button>
-            );
-          })}
-
-        {isTyping &&
-          results.map((customer) => (
-            <button
-              key={customer.hn}
-              className="search-overlay__item"
-              onClick={() => handleSelectResult(customer)}
-            >
-              <span className="search-overlay__item-icon"><IconSearch /></span>
-              <span className="search-overlay__item-label-wrap">
-                <span className="search-overlay__item-label">{customer.name}</span>
-                <span className="search-overlay__item-sublabel">HN {customer.hn}</span>
-              </span>
-              <span className="search-overlay__item-action"><IconArrowUpLeft /></span>
-            </button>
-          ))}
-      </div>
-    </div>
-  );
-}
-
-/* ---- QR Scanner Overlay ---- */
-function QRScannerOverlay({ onClose, onScan }) {
-  const videoRef = useRef(null);
-  const [scanning, setScanning] = useState(true);
-  const [cameraError, setCameraError] = useState('');
-
-  useEffect(() => {
-    let stream = null;
-
-    async function startCamera() {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
-        });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (err) {
-        setCameraError('ไม่สามารถเข้าถึงกล้องได้');
-      }
-    }
-
-    startCamera();
-
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!scanning) return;
-    const timer = setTimeout(() => {
-      setScanning(false);
-      const mockHN = '62173489';
-      const customer = customers.find(c => c.hn === mockHN);
-      if (customer) {
-        setTimeout(() => {
-          onScan(customer);
-        }, 500);
-      }
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [scanning, onScan]);
-
-  return (
-    <div className="qr-scanner-fullscreen-overlay">
-      <div className="qr-modal">
-        <div className="qr-modal__topnav">
-          <button className="opd-detail__back-btn" onClick={onClose}>
-            <IconBack />
-            <span>กลับหน้าหลัก</span>
-          </button>
-        </div>
-        <div className="qr-modal__body">
-          <h2 className="qr-modal__title">ค้นหาผู้ร่วมทำหัตถการ</h2>
-          <div className="qr-modal__frame">
-            <div className="qr-corner qr-corner--tl" />
-            <div className="qr-corner qr-corner--tr" />
-            <div className="qr-corner qr-corner--bl" />
-            <div className="qr-corner qr-corner--br" />
-            {scanning ? (
-              <div className="qr-modal__placeholder">
-                <video ref={videoRef} className="qr-modal__video" autoPlay playsInline muted />
-                <div className="qr-modal__scan-line" />
-                {cameraError && <div className="qr-modal__camera-error">{cameraError}</div>}
-              </div>
-            ) : (
-              <div className="qr-modal__found">
-                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#3F8CFF" strokeWidth="2">
-                  <path d="M9 12l2 2 4-4" />
-                  <circle cx="12" cy="12" r="9" />
-                </svg>
-                <p>พบผู้ใช้แล้ว</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -397,57 +114,6 @@ function statusBadgeModifier(status) {
 }
 
 /* ---- Sub-components ---- */
-function DashboardHeader({ logoSrc, avatarSrc, selectedCustomer, onSearchClick, onQRClick, onClearSearch, onAvatarClick }) {
-  const hasAvatar = avatarSrc && avatarSrc !== '';
-  
-  return (
-    <header className="dashboard__header">
-      <div className="dashboard__header-logo">
-        <img src={logoSrc} alt="V Track" className="dashboard__header-logo-img" />
-      </div>
-
-      {selectedCustomer ? (
-        <div className="dashboard__header-search-pill">
-          <span className="dashboard__header-search-pill-text">{selectedCustomer.hn}</span>
-          <button
-            className="dashboard__header-search-clear"
-            aria-label="ล้างการค้นหา"
-            onClick={onClearSearch}
-          >
-            <IconClose />
-          </button>
-        </div>
-      ) : null}
-
-      <div className="dashboard__header-actions">
-        {!selectedCustomer && (
-          <button
-            className="dashboard__header-icon-btn"
-            aria-label="ค้นหา"
-            onClick={onSearchClick}
-          >
-            <IconSearch />
-          </button>
-        )}
-        <button className="dashboard__header-icon-btn" aria-label="QR Code" onClick={onQRClick}>
-          <IconQR />
-        </button>
-        <button 
-          className={`dashboard__header-avatar${!hasAvatar ? ' dashboard__header-avatar--no-image' : ''}`}
-          onClick={onAvatarClick}
-          aria-label="โปรไฟล์"
-        >
-          {hasAvatar ? (
-            <img src={avatarSrc} alt="โปรไฟล์ผู้ใช้" />
-          ) : (
-            <IconUserSmall />
-          )}
-        </button>
-      </div>
-    </header>
-  );
-}
-
 function DatePickerCard({ label }) {
   return (
     <div className="dashboard__date-card">

@@ -28,6 +28,17 @@ export function applyAutoCompleteToProcedure(proc, now = getCurrentDateTime()) {
   };
 }
 
+/** โหลดรายการหัตถการจากข้อมูลคนไข้ + ใช้กฎ auto เสร็จทันที (ไม่รอ useEffect ชุดหลัง) */
+export function normalizeProceduresFromCustomer(customer, now = getCurrentDateTime()) {
+  const list = customer?.procedures || [];
+  return list.map((p) =>
+    applyAutoCompleteToProcedure(
+      { ...p, status: p.status || 'รอดำเนินการ' },
+      now
+    )
+  );
+}
+
 /** สถานะที่ควรแสดง (รวม auto เสร็จ) — ไม่ mutate object ต้นฉบับ */
 export function getEffectiveProcedureStatus(proc, now = getCurrentDateTime()) {
   if (!proc) return 'รอดำเนินการ';
