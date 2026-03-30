@@ -105,6 +105,8 @@ function FilterModal({ onClose, onConfirm, onClear, initialFilter }) {
   const [participantDropdownOpen, setParticipantDropdownOpen] = useState(false);
   const [selectedParticipantIds, setSelectedParticipantIds] = useState(initialFilter?.participantIds ?? []);
   const participantRef = useRef(null);
+  /** ใช้แยก "mount ครั้งแรก" กับ "ผู้ใช้เปลี่ยนสาขา" — ไม่ล้างแพทย์/ผู้ร่วมเมื่อเปิด popup ซ้ำ */
+  const prevBranchIdRef = useRef(undefined);
 
   /* ---- Lists filtered by selected branch ---- */
   const doctorPool = selectedBranchId
@@ -124,13 +126,17 @@ function FilterModal({ onClose, onConfirm, onClear, initialFilter }) {
     ? `${formatThaiDateDmY(dateStart)} - ${formatThaiDateDmY(dateEnd ?? dateStart)}`
     : '';
 
-  /* reset doctor/participant selections when branch changes */
+  /* reset doctor/participant เฉพาะเมื่อผู้ใช้เปลี่ยนสาขา (ไม่รันตอน mount — ไม่งั้น initialFilter จาก parent ถูกล้างทิ้ง) */
   useEffect(() => {
-    setCheckedDoctorIds([]);
-    setSelectedParticipantIds([]);
-    setShowAllDoctors(false);
-    setParticipantSearch('');
-    setParticipantDropdownOpen(false);
+    const prev = prevBranchIdRef.current;
+    if (prev !== undefined && prev !== selectedBranchId) {
+      setCheckedDoctorIds([]);
+      setSelectedParticipantIds([]);
+      setShowAllDoctors(false);
+      setParticipantSearch('');
+      setParticipantDropdownOpen(false);
+    }
+    prevBranchIdRef.current = selectedBranchId;
   }, [selectedBranchId]);
 
   /* close dropdowns on outside click */
