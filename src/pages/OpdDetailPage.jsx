@@ -1193,10 +1193,22 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
               <span>เลือกตำแหน่งร่างกาย</span>
               <IconChevronRight />
             </button>
-            {positionTags.length > 0 && (
+            {(positionTags.length > 0 || zoneOnlyTags.length > 0) && (
               <div className="proc-popup__tags">
-                {positionTags.map(p => (
-                  <span key={p.id} className="proc-popup__tag">
+                {zoneOnlyTags.map((z) => (
+                  <span key={`z-${z.id}`} className="proc-popup__tag">
+                    {z.name}
+                    {!readOnly && (
+                      <button
+                        type="button"
+                        className="proc-popup__tag-remove"
+                        onClick={() => setSelectedZones((prev) => prev.filter((x) => x !== z.id))}
+                      >×</button>
+                    )}
+                  </span>
+                ))}
+                {positionTags.map((p) => (
+                  <span key={`p-${p.id}`} className="proc-popup__tag">
                     {p.name}
                     {!readOnly && (
                       <button
@@ -1214,22 +1226,6 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
                             return prevZones.filter((zid) => remainZoneIds.has(zid));
                           });
                         }}
-                      >×</button>
-                    )}
-                  </span>
-                ))}
-              </div>
-            )}
-            {zoneOnlyTags.length > 0 && (
-              <div className="proc-popup__tags">
-                {zoneOnlyTags.map((z) => (
-                  <span key={z.id} className="proc-popup__tag">
-                    {z.name}
-                    {!readOnly && (
-                      <button
-                        type="button"
-                        className="proc-popup__tag-remove"
-                        onClick={() => setSelectedZones((prev) => prev.filter((x) => x !== z.id))}
                       >×</button>
                     )}
                   </span>
