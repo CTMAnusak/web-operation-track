@@ -741,9 +741,12 @@
   padding: 20px;
   width: 100%;
   max-width: 380px;
+  /* จำกัดความสูงตามหน้าจอ (จะเกิด scroll เฉพาะเมื่อเนื้อหาเกิน) */
+  max-height: calc(100vh - 48px);
   display: flex;
   flex-direction: column;
   gap: 0;
+  overflow: hidden;
 }
 
 .inner-modal__header {
@@ -778,6 +781,11 @@
   flex-direction: column;
   gap: 10px;
   margin-bottom: 20px;
+  /* ให้ส่วนรายการภายในเลื่อนได้เมื่อโมดัลสูงชนเต็มจอ */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .inner-modal__actions {
