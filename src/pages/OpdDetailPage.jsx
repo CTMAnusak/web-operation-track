@@ -1057,6 +1057,13 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
     });
   }
 
+  function handleRequestComplete() {
+    if (readOnly) return;
+    setSaveAttempted(true);
+    if (!isFormValid) return;
+    setShowCompleteConfirm(true);
+  }
+
   if (showQR) {
     return <QRScannerModal onClose={() => setShowQR(false)} onScan={handleQRScan} />;
   }
@@ -1551,7 +1558,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
             : ' ถึง xx:xx น.'}
         </div>
         {!readOnly && proc.status !== 'เสร็จสิ้น' && (
-          <button type="button" className="btn-complete" onClick={() => setShowCompleteConfirm(true)}>
+          <button type="button" className="btn-complete" onClick={handleRequestComplete}>
             เสร็จสิ้นหัตถการ
           </button>
         )}
