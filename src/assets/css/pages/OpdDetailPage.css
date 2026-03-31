@@ -693,6 +693,9 @@
   font-weight: 700;
   cursor: pointer;
 }
+.btn-primary:hover, .btn-complete:hover {
+  background: #1b75fc;
+}
 .btn-primary {
   transition: opacity 0.15s;
 }
