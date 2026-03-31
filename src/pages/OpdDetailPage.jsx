@@ -232,10 +232,12 @@ const DELETABLE_ROLE_IDS = ['r2', 'r3', 'r4'];
 
 function canDeleteProcCard(proc, currentUserRoleId) {
   if (!DELETABLE_ROLE_IDS.includes(currentUserRoleId)) return false;
-  if (proc.status === 'เสร็จสิ้น' && isCardOlderThanOneDay(proc)) return false;
+  /* การ์ดสถานะเสร็จสิ้นไม่แสดงปุ่มลบ (กากบาท) เลย */
+  if (proc.status === 'เสร็จสิ้น') return false;
   return true;
 }
 
+/** ใช้กับการ์ดเสร็จสิ้น: เกิน 24 ชม. นับจาก createdAt → หน้ารายละเอียดเป็นโหมดอ่านอย่างเดียว */
 function isCardOlderThanOneDay(proc) {
   const createdAt = proc.createdAt ? new Date(proc.createdAt) : null;
   if (!createdAt) return false;

@@ -13,7 +13,33 @@ export const authService = {
   async login(username, password) {
     try {
       const response = await fetch('/db.json');
-      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          errors: {
+            general: `ไม่สามารถโหลดข้อมูลผู้ใช้ได้ (รหัส ${response.status})`,
+          },
+        };
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        console.error('Error parsing JSON:', error);
+        return {
+          success: false,
+          errors: { general: 'รูปแบบข้อมูลจากเซิร์ฟเวอร์ไม่ถูกต้อง' },
+        };
+      }
+
+      if (!Array.isArray(data?.users)) {
+        return {
+          success: false,
+          errors: { general: 'ไม่พบรายการผู้ใช้ในระบบ' },
+        };
+      }
 
       const user = data.users.find((u) => u.username === username);
       const errors = {};
@@ -44,9 +70,13 @@ export const authService = {
         },
       };
     } catch {
+      console.error('Error connecting to server:', error);
       return {
         success: false,
-        errors: { general: 'เกิดข้อผิดพลาดในการเชื่อมต่อ' },
+        errors: {
+          general:
+            'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง',
+        },
       };
     }
   },

@@ -21,16 +21,18 @@ function LoginPage() {
 
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);
-    if (errors.username) {
-      setErrors(prev => ({ ...prev, username: undefined }));
-    }
+    setErrors((prev) => {
+      if (!prev.username && !prev.general) return prev;
+      return { ...prev, username: undefined, general: undefined };
+    });
   };
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
-    if (errors.password) {
-      setErrors(prev => ({ ...prev, password: undefined }));
-    }
+    setErrors((prev) => {
+      if (!prev.password && !prev.general) return prev;
+      return { ...prev, password: undefined, general: undefined };
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -51,19 +53,29 @@ function LoginPage() {
     }
 
     setIsLoading(true);
-    
-    const result = await authService.login(username, password);
-    
-    setIsLoading(false);
-    
-    if (result.success) {
-      if (rememberMe) {
-        localStorage.setItem('rememberedUser', username);
+    try {
+      const result = await authService.login(username, password);
+
+      if (result.success) {
+        if (rememberMe) {
+          localStorage.setItem('rememberedUser', username);
+        }
+        localStorage.setItem('currentUser', JSON.stringify(result.user));
+        navigate(routePaths.dashboard);
+      } else {
+        setErrors(
+          result.errors && Object.keys(result.errors).length > 0
+            ? result.errors
+            : { general: 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองอีกครั้ง' }
+        );
       }
-      localStorage.setItem('currentUser', JSON.stringify(result.user));
-      navigate(routePaths.dashboard);
-    } else {
-      setErrors(result.errors || {});
+    } catch {
+      setErrors({
+        general:
+          'เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณารีเฟรชหน้าแล้วลองอีกครั้ง',
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -77,6 +89,12 @@ function LoginPage() {
 
         <div className="login-page__card">
           <h1 className="login-page__title">Sign In to Tracking</h1>
+
+          {errors.general ? (
+            <p className="login-page__error" role="alert">
+              {errors.general}
+            </p>
+          ) : null}
           
           <form onSubmit={handleSubmit} className="login-page__form">
             <AppInput

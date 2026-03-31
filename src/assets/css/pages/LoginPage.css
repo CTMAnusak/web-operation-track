@@ -44,6 +44,18 @@
   text-align: center;
 }
 
+.login-page__error {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.4;
+  color: #c62828;
+  background-color: #ffebee;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: -12px 0 16px 0;
+  text-align: center;
+}
+
 .login-page__form {
   display: flex;
   flex-direction: column;
