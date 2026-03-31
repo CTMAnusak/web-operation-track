@@ -680,11 +680,8 @@
   flex: 1;
 }
 
-/* =========================================
-   Shared Buttons
-   ========================================= */
-
-.btn-primary {
+/*Shared Buttons*/
+.btn-primary, .btn-complete {
   width: 100%;
   padding: 14px;
   background: #3F8CFF;
@@ -695,6 +692,8 @@
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
+}
+.btn-primary {
   transition: opacity 0.15s;
 }
 
@@ -718,22 +717,8 @@
 }
 
 .btn-complete {
-  width: 100%;
-  padding: 14px;
-  background: #ffffff;
-  color: #1a1a2e;
-  border: 2px solid #e0e0e0;
-  border-radius: 14px;
-  font-family: var(--font-sans);
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
   margin-top: 14px;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.btn-complete:hover {
-  background: #f7f8fa;
+  transition: background 0.15s, opacity 0.15s;
 }
 
 /* =========================================

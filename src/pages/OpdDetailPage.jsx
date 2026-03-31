@@ -858,7 +858,6 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
 
   /* Wellness - Slim Pen fields */
   const [waist, setWaist] = useState(proc.waist || '');
-  const [startWeight, setStartWeight] = useState(proc.startWeight || '');
   const [weight, setWeight] = useState(proc.weight || '');
   const [muscle, setMuscle] = useState(proc.muscle || '');
   const [fat, setFat] = useState(proc.fat || '');
@@ -941,16 +940,32 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
       return `${k} | ${v} ${keyDef?.unit || 'shots'}`;
     });
 
-  /* Wellness target weight progress */
+  /* Slim pen — เปอร์เซ็นต์ลดสำเร็จ: ถ่วงน้ำหนัก / ไขมัน / กล้ามเนื้อ (ไม่ใช้ข้อมูลย้อนหลัง) */
+  const SLIM_PEN_STANDARD_FAT_PCT = 20;
+  const SLIM_PEN_TARGET_MUSCLE_KG = 55;
   const targetWeightNum = parseFloat(targetWeight);
   const currentWeightNum = parseFloat(weight);
-  const startWeightNum = parseFloat(startWeight);
+  const fatNum = parseFloat(fat);
+  const muscleNum = parseFloat(muscle);
   const progressPercent = (() => {
-    if (isNaN(targetWeightNum) || isNaN(currentWeightNum) || isNaN(startWeightNum)) return 0;
-    const totalToLose = startWeightNum - targetWeightNum;
-    if (totalToLose <= 0) return 0;
-    const lostNow = startWeightNum - currentWeightNum;
-    return Math.max(0, Math.min(100, Math.round((lostNow / totalToLose) * 100)));
+    if (
+      isNaN(targetWeightNum) ||
+      isNaN(currentWeightNum) ||
+      isNaN(fatNum) ||
+      isNaN(muscleNum) ||
+      currentWeightNum <= 0 ||
+      fatNum <= 0
+    ) {
+      return 0;
+    }
+    const clampScore = (v) =>
+      Number.isFinite(v) ? Math.max(0, Math.min(100, v)) : 0;
+    const weightScore = clampScore((targetWeightNum / currentWeightNum) * 100);
+    const fatScore = clampScore((SLIM_PEN_STANDARD_FAT_PCT / fatNum) * 100);
+    const muscleScore = clampScore((muscleNum / SLIM_PEN_TARGET_MUSCLE_KG) * 100);
+    const combined =
+      weightScore * 0.5 + fatScore * 0.3 + muscleScore * 0.2;
+    return Math.round(Math.max(0, Math.min(100, combined)));
   })();
 
   const hasPositions = isWellness ? true : selectedZones.some((zoneId) => {
@@ -982,7 +997,6 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
   const hasParticipants = participants.length > 0;
 
   const hasWaist = String(waist).trim() !== '';
-  const hasStartWeight = String(startWeight).trim() !== '';
   const hasWeight = String(weight).trim() !== '';
   const hasMuscle = String(muscle).trim() !== '';
   const hasFat = String(fat).trim() !== '';
@@ -995,7 +1009,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
   const hasIVFlowRate = ivFlowRate !== null;
 
   const isWellnessDataFilled = isSlimPen
-    ? (hasWaist && hasStartWeight && hasWeight && hasMuscle && hasFat && hasTargetWeight && hasTargetDuration)
+    ? (hasWaist && hasWeight && hasMuscle && hasFat && hasTargetWeight && hasTargetDuration)
     : isIVDrip
       ? (hasIVFormula && hasIVSubFormula && hasIVVolume && hasIVFlowRate)
       : true;
@@ -1021,6 +1035,9 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
           ? 'กำลังทำ'
           : 'รอดำเนินการ';
 
+    const slimPenBaseline =
+      String(proc.startWeight || '').trim() || String(weight).trim();
+
     onSave({
       ...proc,
       note,
@@ -1029,7 +1046,15 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
       selectedPositions: isWellness ? [] : selectedPositions,
       settings: isInject || isWellness || isLaser ? {} : settings,
       ...(isLaser ? { laserSettings } : {}),
-      ...(isSlimPen && { waist, startWeight, weight, muscle, fat, targetWeight, targetDurationMonths }),
+      ...(isSlimPen && {
+        waist,
+        startWeight: slimPenBaseline,
+        weight,
+        muscle,
+        fat,
+        targetWeight,
+        targetDurationMonths,
+      }),
       ...(isIVDrip && { ivFormula, ivSubFormula, ivVolume, ivFlowRate }),
       status: nextStatus,
     });
@@ -1194,16 +1219,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
               onChange={e => setWaist(e.target.value)}
               readOnly={readOnly}
             />
-            <div className="proc-popup__field-label" style={{ marginTop: 14 }}>น้ำหนักเริ่มต้น (กก.)</div>
-            <input
-              type="number"
-              className={`wellness-input ${saveAttempted && !hasStartWeight ? 'proc-popup__input--error' : ''}`}
-              placeholder="ระบุน้ำหนักเริ่มต้น"
-              value={startWeight}
-              onChange={e => setStartWeight(e.target.value)}
-              readOnly={readOnly}
-            />
-            <div className="proc-popup__field-label" style={{ marginTop: 14 }}>น้ำหนักปัจจุบัน (กก.)</div>
+            <div className="proc-popup__field-label" style={{ marginTop: 14 }}>น้ำหนัก (กก.)</div>
             <input
               type="number"
               className={`wellness-input ${saveAttempted && !hasWeight ? 'proc-popup__input--error' : ''}`}
@@ -1889,7 +1905,6 @@ function ProcedureCard({ proc, onDelete, onClick, canDeleteCard }) {
 
   const wellnessBodyLabel = (() => {
     const parts = [];
-    if (proc.startWeight) parts.push(`เริ่มต้น ${proc.startWeight} กก.`);
     if (proc.waist) parts.push(`รอบเอว ${proc.waist} นิ้ว`);
     if (proc.weight) parts.push(`น้ำหนัก ${proc.weight} กก.`);
     if (proc.muscle) parts.push(`กล้ามเนื้อ ${proc.muscle} กก.`);
