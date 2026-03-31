@@ -940,9 +940,7 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
       return `${k} | ${v} ${keyDef?.unit || 'shots'}`;
     });
 
-  /* Slim pen — เปอร์เซ็นต์ลดสำเร็จ: ถ่วงน้ำหนัก / ไขมัน / กล้ามเนื้อ (ไม่ใช้ข้อมูลย้อนหลัง) */
-  const SLIM_PEN_STANDARD_FAT_PCT = 20;
-  const SLIM_PEN_TARGET_MUSCLE_KG = 55;
+  /* Slim pen — ระดับความใกล้เคียงเป้าหมาย (%) จากน้ำหนัก / ไขมัน / กล้ามเนื้อ */
   const targetWeightNum = parseFloat(targetWeight);
   const currentWeightNum = parseFloat(weight);
   const fatNum = parseFloat(fat);
@@ -953,18 +951,17 @@ function ProcDetailPopup({ proc, onClose, onSave, onComplete, readOnly = false }
       isNaN(currentWeightNum) ||
       isNaN(fatNum) ||
       isNaN(muscleNum) ||
-      currentWeightNum <= 0 ||
-      fatNum <= 0
+      currentWeightNum <= 0
     ) {
       return 0;
     }
     const clampScore = (v) =>
       Number.isFinite(v) ? Math.max(0, Math.min(100, v)) : 0;
     const weightScore = clampScore((targetWeightNum / currentWeightNum) * 100);
-    const fatScore = clampScore((SLIM_PEN_STANDARD_FAT_PCT / fatNum) * 100);
-    const muscleScore = clampScore((muscleNum / SLIM_PEN_TARGET_MUSCLE_KG) * 100);
+    const fatScore = clampScore(100 - fatNum);
+    const muscleScore = clampScore((muscleNum / currentWeightNum) * 100);
     const combined =
-      weightScore * 0.5 + fatScore * 0.3 + muscleScore * 0.2;
+      weightScore * 0.5 + fatScore * 0.25 + muscleScore * 0.25;
     return Math.round(Math.max(0, Math.min(100, combined)));
   })();
 
