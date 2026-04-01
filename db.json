@@ -1,6 +1,16 @@
 {
   "users": [
     {
+      "id": "u0",
+      "username": "test",
+      "password": "123456",
+      "fullName": "โลโล โนอาร์เรส",
+      "nickname": "โซโล",
+      "branchId": "b1",
+      "roleId": "r3",
+      "avatarUrl": "/src/assets/images/avatar-men.png"
+    },
+    {
       "id": "u1",
       "username": "OPDX32434",
       "password": "123456",
