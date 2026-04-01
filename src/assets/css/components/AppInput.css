@@ -11,6 +11,7 @@
   border: 1.5px solid #dde1e8;
   border-radius: 12px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
 }
 
 .app-input__wrapper--focused {
