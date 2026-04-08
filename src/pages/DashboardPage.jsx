@@ -229,7 +229,7 @@ function OpdCard({ customer, onClick }) {
                 </div>
               ))
             ) : (
-              <span className="opd-card__field-value">-</span>
+              <span className="opd-card__field-value"></span>
             )}
           </div>
         </div>
@@ -327,7 +327,31 @@ function DashboardPage() {
   );
 
   const baseList = hasSearch ? [selectedCustomer] : customers;
-  const displayList = applyFilters(baseList, effectiveFilter);
+  const filteredList = applyFilters(baseList, effectiveFilter);
+
+  const statusSortOrder = {
+    'รอดำเนินการ': 0,
+    'กำลังทำ': 1,
+    'เสร็จสิ้น': 2,
+  };
+
+  const parseAppointmentTimeToMinutes = (timeStr) => {
+    if (!timeStr || typeof timeStr !== 'string') return Number.MAX_SAFE_INTEGER;
+    const [h, m] = timeStr.split(':').map(Number);
+    if (Number.isNaN(h) || Number.isNaN(m)) return Number.MAX_SAFE_INTEGER;
+    return (h * 60) + m;
+  };
+
+  const displayList = [...filteredList].sort((a, b) => {
+    const statusA = statusSortOrder[deriveCustomerDisplayStatus(a)] ?? Number.MAX_SAFE_INTEGER;
+    const statusB = statusSortOrder[deriveCustomerDisplayStatus(b)] ?? Number.MAX_SAFE_INTEGER;
+
+    if (statusA !== statusB) return statusA - statusB;
+
+    const timeA = parseAppointmentTimeToMinutes(a.appointmentTime);
+    const timeB = parseAppointmentTimeToMinutes(b.appointmentTime);
+    return timeA - timeB;
+  });
 
   const summary = computeSummaryFromList(displayList);
   const dateLabel = buildDateLabel(effectiveFilter.dateStart, effectiveFilter.dateEnd);
