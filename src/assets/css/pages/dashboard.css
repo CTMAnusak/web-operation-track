@@ -356,9 +356,10 @@
 .opd-card__branch-col {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  align-items: flex-start;
+  gap: 4px;
   flex-shrink: 0;
+  min-width: 88px;
 }
 
 .opd-card__branch-label,
@@ -366,7 +367,8 @@
   font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
-  color: #888;
+  color: #8f95a3;
+  text-align: left;
 }
 
 /* ----- OPD Card Middle Row ----- */

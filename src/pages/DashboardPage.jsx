@@ -189,7 +189,7 @@ function OpdCard({ customer, onClick }) {
 
   const durationLabel = hasAny && (hours > 0 || minutes > 0)
     ? `${hours > 0 ? `${hours}.${String(minutes).padStart(2, '0')}` : `0.${String(minutes).padStart(2, '0')}`} ชม.`
-    : '-';
+    : '- ชม.';
 
   return (
     <div className="opd-card" onClick={onClick} style={{ cursor: 'pointer' }}>
@@ -205,7 +205,7 @@ function OpdCard({ customer, onClick }) {
         </div>
         <div className="opd-card__branch-col">
           <span className="opd-card__branch-label">สาขา {getBranchName(customer.branchId)}</span>
-          <span className="opd-card__doctor-label">{getDoctorNickname(customer.doctorId)}</span>
+          <span className="opd-card__doctor-label">แพทย์ {getDoctorNickname(customer.doctorId)}</span>
         </div>
       </div>
 
